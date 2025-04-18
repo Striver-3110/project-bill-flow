@@ -25,6 +25,21 @@ export function useEmployees() {
   const { data: employees, isLoading, error } = useQuery({
     queryKey: ['employees'],
     queryFn: async () => {
+      // Check if the employees table exists first
+      const { data: tables, error: tablesError } = await supabase
+        .from('employees')
+        .select('*')
+        .limit(1);
+      
+      if (tablesError) {
+        console.error("Error checking employees table:", tablesError);
+        // If table doesn't exist, return empty array to avoid further errors
+        if (tablesError.code === "PGRST116") {
+          return [] as Employee[];
+        }
+        throw tablesError;
+      }
+      
       const { data, error } = await supabase
         .from('employees')
         .select('*')
@@ -99,7 +114,7 @@ export function useEmployees() {
   });
 
   return {
-    employees,
+    employees: employees || [],
     isLoading,
     error,
     createEmployee: createEmployeeMutation.mutate,
