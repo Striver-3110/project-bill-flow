@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/hooks/use-projects";
@@ -51,6 +50,8 @@ export function NewProjectDialog() {
       await createProject.mutateAsync({
         ...data,
         status: 'ACTIVE',
+        start_date: data.start_date.toISOString(),
+        end_date: data.end_date.toISOString(),
       });
       
       toast({
