@@ -13,7 +13,7 @@ export type CreateEmployeeInput = {
   department: string;
   status: 'active' | 'inactive';
   cost_rate: number;
-  phone?: string; // Ensure this is optional
+  phone?: string;
 };
 
 export type UpdateEmployeeInput = {
@@ -26,53 +26,30 @@ export function useEmployees() {
   const { data: employees, isLoading, error } = useQuery({
     queryKey: ['employees'],
     queryFn: async () => {
-      try {
-        // Check if the user session exists
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          console.warn("No active session found. Authentication required for accessing employees data.");
-          return [];
-        }
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        const { data, error } = await supabase
-          .from('employees')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error("Error fetching employees:", error);
-          throw error;
-        }
-
-        return (data || []) as Employee[];
-      } catch (err) {
-        console.error("Error in employee query:", err);
-        throw err;
+      if (error) {
+        console.error("Error fetching employees:", error);
+        throw error;
       }
+
+      return (data || []) as Employee[];
     }
   });
 
   const createEmployeeMutation = useMutation({
     mutationFn: async (input: CreateEmployeeInput) => {
-      try {
-        // Check if the user session exists
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          throw new Error("Authentication required to create an employee");
-        }
-        
-        const { data, error } = await supabase
-          .from('employees')
-          .insert([input])
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from('employees')
+        .insert([input])
+        .select()
+        .single();
 
-        if (error) throw error;
-        return data as Employee;
-      } catch (error) {
-        console.error("Error in create mutation:", error);
-        throw error;
-      }
+      if (error) throw error;
+      return data as Employee;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -80,34 +57,22 @@ export function useEmployees() {
     },
     onError: (error) => {
       console.error("Error creating employee:", error);
-      toast.error("Failed to create employee. Please make sure you're logged in.");
+      toast.error("Failed to create employee");
     }
   });
 
   const updateEmployeeMutation = useMutation({
     mutationFn: async (input: UpdateEmployeeInput) => {
       const { employee_id, ...updateData } = input;
-      
-      try {
-        // Check if the user session exists
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          throw new Error("Authentication required to update an employee");
-        }
-        
-        const { data, error } = await supabase
-          .from('employees')
-          .update(updateData)
-          .eq('employee_id', employee_id)
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from('employees')
+        .update(updateData)
+        .eq('employee_id', employee_id)
+        .select()
+        .single();
 
-        if (error) throw error;
-        return data as Employee;
-      } catch (error) {
-        console.error("Error in update mutation:", error);
-        throw error;
-      }
+      if (error) throw error;
+      return data as Employee;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -115,29 +80,18 @@ export function useEmployees() {
     },
     onError: (error) => {
       console.error("Error updating employee:", error);
-      toast.error("Failed to update employee. Please make sure you're logged in.");
+      toast.error("Failed to update employee");
     }
   });
 
   const deleteEmployeeMutation = useMutation({
     mutationFn: async (employeeId: string) => {
-      try {
-        // Check if the user session exists
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session) {
-          throw new Error("Authentication required to delete an employee");
-        }
-        
-        const { error } = await supabase
-          .from('employees')
-          .delete()
-          .eq('employee_id', employeeId);
-        
-        if (error) throw error;
-      } catch (error) {
-        console.error("Error in delete mutation:", error);
-        throw error;
-      }
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('employee_id', employeeId);
+      
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -145,7 +99,7 @@ export function useEmployees() {
     },
     onError: (error) => {
       console.error("Error deleting employee:", error);
-      toast.error("Failed to delete employee. Please make sure you're logged in.");
+      toast.error("Failed to delete employee");
     }
   });
 
