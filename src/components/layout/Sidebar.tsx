@@ -7,10 +7,7 @@ import {
   Briefcase, 
   FileText, 
   UserCircle, 
-  Settings, 
-  LogOut, 
-  Menu, 
-  X
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -87,15 +84,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, toggleSidebar }) =>
           );
         })}
       </nav>
-      
-      <div className="px-4 py-6 border-t border-billflow-gray-200">
-        <button
-          className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-billflow-gray-700 hover:bg-billflow-gray-100 w-full"
-        >
-          <LogOut className="mr-3 h-5 w-5 text-billflow-gray-500" />
-          Sign out
-        </button>
-      </div>
     </div>
   );
 };

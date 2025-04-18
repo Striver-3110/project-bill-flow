@@ -1,21 +1,9 @@
 
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { LogOut, UserCircle } from "lucide-react";
-import { toast } from "sonner";
-
 type HeaderProps = {
   toggleSidebar: () => void;
 };
 
 const Header = ({ toggleSidebar }: HeaderProps) => {
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-    toast.success("Signed out successfully");
-  };
-
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
@@ -44,27 +32,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           <h1 className="font-bold text-xl text-primary hidden lg:block">
             Employee Management
           </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          {user && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <UserCircle className="h-5 w-5" />
-                <span className="text-sm font-medium hidden md:block">
-                  {user.email}
-                </span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="ml-2"
-              >
-                <LogOut className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </header>
