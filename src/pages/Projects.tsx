@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Briefcase, CheckCircle, Clock, AlertCircle, Users, Calendar, 
-  DollarSign, PieChart, BarChart2, FileText, Timer, UserCheck 
+  DollarSign, PieChartIcon, BarChart2, FileText, Timer, UserCheck 
 } from "lucide-react";
 import StatsCard from "@/components/ui/stats-card";
 import StatusBadge from "@/components/ui/status-badge";
@@ -45,6 +45,7 @@ const statusData = [
   { name: "On Hold", value: 2, color: "#F59E0B" },
 ];
 
+// Update project statuses to match the expected types in StatusBadge
 const recentProjects = [
   {
     id: "1",
@@ -52,7 +53,7 @@ const recentProjects = [
     clientName: "Tech Solutions Inc.",
     startDate: "2024-01-15",
     endDate: "2024-06-30",
-    status: "active",
+    status: "active" as const,
     assignedEmployees: 5,
     budget: 75000,
     hoursLogged: 720,
@@ -64,7 +65,7 @@ const recentProjects = [
     clientName: "Startup Inc",
     startDate: "2024-02-01",
     endDate: "2024-08-15",
-    status: "active",
+    status: "active" as const,
     assignedEmployees: 8,
     budget: 120000,
     hoursLogged: 840,
@@ -76,7 +77,7 @@ const recentProjects = [
     clientName: "Corp Solutions",
     startDate: "2024-01-01",
     endDate: "2024-03-31",
-    status: "completed",
+    status: "completed" as const,
     assignedEmployees: 4,
     budget: 45000,
     hoursLogged: 620,
@@ -88,7 +89,7 @@ const recentProjects = [
     clientName: "Global Services Ltd.",
     startDate: "2024-02-15",
     endDate: "2024-04-15",
-    status: "on-hold",
+    status: "on-hold" as const,
     assignedEmployees: 3,
     budget: 35000,
     hoursLogged: 210,
