@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -83,9 +82,9 @@ const Employees = () => {
        employee.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
        employee.department.toLowerCase().includes(searchQuery.toLowerCase())) &&
       // Apply department filter if set
-      (!departmentFilter || employee.department.toLowerCase() === departmentFilter.toLowerCase()) &&
+      (!departmentFilter || departmentFilter === "all" || employee.department.toLowerCase() === departmentFilter.toLowerCase()) &&
       // Apply status filter if set
-      (!statusFilter || employee.status === statusFilter)
+      (!statusFilter || statusFilter === "all" || employee.status === statusFilter)
     );
 
   // Compute stats for the dashboard
@@ -188,11 +187,10 @@ const Employees = () => {
         />
         <StatsCard
           title="Avg. Cost Rate"
-          value={employeeStats.averageCostRate.toFixed(2)}
+          value={`$${employeeStats.averageCostRate.toFixed(2)}`}
           icon={DollarSign}
           description="Per hour/employee"
           variant="default"
-          prefix="$"
         />
         <StatsCard
           title="Departments"
@@ -218,14 +216,14 @@ const Employees = () => {
         
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select
-            value={departmentFilter || ""}
-            onValueChange={(value) => setDepartmentFilter(value === "" ? null : value)}
+            value={departmentFilter || "all"}
+            onValueChange={(value) => setDepartmentFilter(value === "all" ? null : value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Department" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Departments</SelectItem>
+              <SelectItem value="all">All Departments</SelectItem>
               {[...new Set(employees?.map(e => e.department))].map(dept => (
                 <SelectItem key={dept} value={dept}>{dept}</SelectItem>
               ))}
@@ -233,14 +231,14 @@ const Employees = () => {
           </Select>
           
           <Select
-            value={statusFilter || ""}
-            onValueChange={(value) => setStatusFilter(value === "" ? null : value)}
+            value={statusFilter || "all"}
+            onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
           >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
