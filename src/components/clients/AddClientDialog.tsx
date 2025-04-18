@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 
 const clientSchema = z.object({
   client_name: z.string().min(1, "Client name is required"),
@@ -26,6 +27,7 @@ type ClientFormValues = z.infer<typeof clientSchema>;
 
 export default function AddClientDialog() {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
   
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
@@ -42,16 +44,32 @@ export default function AddClientDialog() {
 
   const onSubmit = async (data: ClientFormValues) => {
     try {
-      // Fix: Pass data directly as a single object, not as an array
+      // Create a new object with required fields to satisfy TypeScript
+      const clientData = {
+        client_name: data.client_name,
+        contact_person: data.contact_person,
+        contact_email: data.contact_email,
+        contract_start_date: data.contract_start_date,
+        // Optional fields
+        contact_phone: data.contact_phone || null,
+        address: data.address || null,
+        contract_end_date: data.contract_end_date || null,
+        payment_terms: data.payment_terms || null,
+        status: 'active'
+      };
+
       const { error } = await supabase
         .from('clients')
-        .insert(data); // Don't wrap in array brackets
+        .insert(clientData);
 
       if (error) throw error;
 
       toast.success("Client added successfully");
       setOpen(false);
       form.reset();
+      
+      // Invalidate and refetch clients query to update the list
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
     } catch (error) {
       toast.error("Failed to add client");
       console.error("Error adding client:", error);

@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/ui/status-badge";
 import { formatDate } from "@/utils/invoiceUtils";
 import AddClientDialog from "@/components/clients/AddClientDialog";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Clients = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const queryClient = useQueryClient();
 
   // Fetch clients data
   const { data: clients, isLoading, error } = useQuery({
@@ -38,6 +39,9 @@ const Clients = () => {
 
       if (error) throw error;
       toast.success("Client deleted successfully");
+      
+      // Invalidate and refetch clients query
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
     } catch (error) {
       toast.error("Error deleting client");
       console.error("Error deleting client:", error);
@@ -173,7 +177,7 @@ const Clients = () => {
                     <div className="text-sm text-billflow-gray-900">{client.payment_terms || 'Not specified'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={client.status || 'active'} />
+                    <StatusBadge status={(client.status as "active" | "inactive") || 'active'} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Button variant="ghost" size="sm" className="text-billflow-blue-600 mr-2">
