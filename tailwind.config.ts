@@ -52,6 +52,36 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Bill Flow colors
+				billflow: {
+					blue: {
+						50: '#E6F0FA',
+						100: '#CCDFF5',
+						200: '#99BFEB',
+						300: '#669FE0',
+						400: '#337FD6',
+						500: '#0052CC', // Primary blue
+						600: '#0747A6', // Darker blue
+						700: '#05367F',
+						800: '#042559',
+						900: '#021233',
+					},
+					gray: {
+						50: '#F7F8F9',
+						100: '#F4F5F7', // Light background
+						200: '#EBECF0', // Borders, dividers
+						300: '#DFE1E6',
+						400: '#C1C7D0',
+						500: '#97A0AF',
+						600: '#7A869A',
+						700: '#5E6C84',
+						800: '#42526E',
+						900: '#253858',
+					},
+					success: '#36B37E',
+					warning: '#FFAB00',
+					error: '#FF5630',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
