@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,7 +41,7 @@ const recentProjects = [
     clientName: "Tech Corp",
     startDate: "2024-01-15",
     endDate: "2024-06-30",
-    status: "active",
+    status: "active" as const,
     assignedEmployees: 5,
   },
   {
@@ -51,7 +50,7 @@ const recentProjects = [
     clientName: "Startup Inc",
     startDate: "2024-02-01",
     endDate: "2024-08-15",
-    status: "active",
+    status: "active" as const,
     assignedEmployees: 8,
   },
   {
@@ -60,7 +59,7 @@ const recentProjects = [
     clientName: "Corp Solutions",
     startDate: "2024-01-01",
     endDate: "2024-03-31",
-    status: "completed",
+    status: "completed" as const,
     assignedEmployees: 4,
   },
 ];
@@ -223,4 +222,3 @@ const Projects = () => {
 };
 
 export default Projects;
-
