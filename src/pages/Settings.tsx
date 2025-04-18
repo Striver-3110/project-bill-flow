@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Building2, 
   Bell, 
@@ -19,7 +20,8 @@ import {
   Globe, 
   MailCheck,
   CloudCog,
-  Save
+  Save,
+  Check
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,8 +42,14 @@ const notificationsSchema = z.object({
   projectUpdates: z.boolean().default(true),
 });
 
+const regionalSettingsSchema = z.object({
+  timeZone: z.string().default("america_new_york"),
+  dateFormat: z.string().default("mdy"),
+});
+
 type CompanyFormValues = z.infer<typeof companyFormSchema>;
 type NotificationValues = z.infer<typeof notificationsSchema>;
+type RegionalSettingsValues = z.infer<typeof regionalSettingsSchema>;
 
 const Settings = () => {
   // Company form
@@ -67,6 +75,15 @@ const Settings = () => {
       projectUpdates: true,
     },
   });
+  
+  // Regional settings form
+  const regionalSettingsForm = useForm<RegionalSettingsValues>({
+    resolver: zodResolver(regionalSettingsSchema),
+    defaultValues: {
+      timeZone: "america_new_york",
+      dateFormat: "mdy",
+    },
+  });
 
   // Form submission handlers
   const onCompanySubmit = (data: CompanyFormValues) => {
@@ -77,6 +94,11 @@ const Settings = () => {
   const onNotificationsSubmit = (data: NotificationValues) => {
     toast.success("Notification preferences updated successfully");
     console.log("Notification data:", data);
+  };
+  
+  const onRegionalSettingsSubmit = (data: RegionalSettingsValues) => {
+    toast.success("Regional settings updated successfully");
+    console.log("Regional settings data:", data);
   };
 
   return (
@@ -180,7 +202,7 @@ const Settings = () => {
                       <FormItem>
                         <FormLabel>Business Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your business address" {...field} />
+                          <Textarea placeholder="Enter your business address" {...field} className="min-h-[80px]" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -206,49 +228,68 @@ const Settings = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Time Zone</Label>
-                  <Select defaultValue="america_new_york">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time zone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>North America</SelectLabel>
-                        <SelectItem value="america_new_york">Eastern Time (ET)</SelectItem>
-                        <SelectItem value="america_chicago">Central Time (CT)</SelectItem>
-                        <SelectItem value="america_denver">Mountain Time (MT)</SelectItem>
-                        <SelectItem value="america_los_angeles">Pacific Time (PT)</SelectItem>
-                      </SelectGroup>
-                      <SelectGroup>
-                        <SelectLabel>Europe</SelectLabel>
-                        <SelectItem value="europe_london">London (GMT)</SelectItem>
-                        <SelectItem value="europe_paris">Paris (CET)</SelectItem>
-                      </SelectGroup>
-                      <SelectGroup>
-                        <SelectLabel>Asia</SelectLabel>
-                        <SelectItem value="asia_tokyo">Tokyo (JST)</SelectItem>
-                        <SelectItem value="asia_shanghai">Shanghai (CST)</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Date Format</Label>
-                  <Select defaultValue="mdy">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select date format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
-                      <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
-                      <SelectItem value="ymd">YYYY/MM/DD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <Form {...regionalSettingsForm}>
+                <form onSubmit={regionalSettingsForm.handleSubmit(onRegionalSettingsSubmit)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={regionalSettingsForm.control}
+                      name="timeZone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Time Zone</FormLabel>
+                          <FormControl>
+                            <select 
+                              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                              {...field}
+                            >
+                              <optgroup label="North America">
+                                <option value="america_new_york">Eastern Time (ET)</option>
+                                <option value="america_chicago">Central Time (CT)</option>
+                                <option value="america_denver">Mountain Time (MT)</option>
+                                <option value="america_los_angeles">Pacific Time (PT)</option>
+                              </optgroup>
+                              <optgroup label="Europe">
+                                <option value="europe_london">London (GMT)</option>
+                                <option value="europe_paris">Paris (CET)</option>
+                              </optgroup>
+                              <optgroup label="Asia">
+                                <option value="asia_tokyo">Tokyo (JST)</option>
+                                <option value="asia_shanghai">Shanghai (CST)</option>
+                              </optgroup>
+                            </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={regionalSettingsForm.control}
+                      name="dateFormat"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date Format</FormLabel>
+                          <FormControl>
+                            <select 
+                              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                              {...field}
+                            >
+                              <option value="mdy">MM/DD/YYYY</option>
+                              <option value="dmy">DD/MM/YYYY</option>
+                              <option value="ymd">YYYY/MM/DD</option>
+                            </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button type="submit">Save Regional Settings</Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </TabsContent>
@@ -582,7 +623,7 @@ const Settings = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                       {role.permissions.map((permission, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm">
-                          <CheckIcon className="h-4 w-4 text-green-500" />
+                          <Check className="h-4 w-4 text-green-500" />
                           <span>{permission}</span>
                         </div>
                       ))}
@@ -608,17 +649,23 @@ const Settings = () => {
                 <h3 className="text-lg font-medium">Password</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
+                    <label htmlFor="current-password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Current Password
+                    </label>
                     <Input id="current-password" type="password" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
+                    <label htmlFor="new-password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      New Password
+                    </label>
                     <Input id="new-password" type="password" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                    <label htmlFor="confirm-password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Confirm New Password
+                    </label>
                     <Input id="confirm-password" type="password" />
                   </div>
                 </div>
@@ -718,14 +765,16 @@ const Settings = () => {
   );
 };
 
-// Missing components to import
-const Label = FormLabel;
-const CheckIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
-);
-const Badge = ({ children, className, variant = "default" }: { children: React.ReactNode, className?: string, variant?: "default" | "secondary" | "outline" }) => {
+// Define Badge component properly
+const Badge = ({ 
+  children, 
+  className, 
+  variant = "default" 
+}: { 
+  children: React.ReactNode, 
+  className?: string, 
+  variant?: "default" | "secondary" | "outline" 
+}) => {
   const variantStyles = {
     default: "bg-primary text-primary-foreground hover:bg-primary/80",
     secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -738,18 +787,5 @@ const Badge = ({ children, className, variant = "default" }: { children: React.R
     </span>
   );
 };
-const Select = ({ children, defaultValue }: { children: React.ReactNode, defaultValue?: string }) => (
-  <div className="relative w-full">
-    <select className="w-full h-10 pl-3 pr-10 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-      {children}
-    </select>
-  </div>
-);
-const SelectTrigger = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-const SelectValue = ({ placeholder }: { placeholder?: string }) => <div>{placeholder}</div>;
-const SelectContent = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-const SelectGroup = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-const SelectLabel = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-const SelectItem = ({ value, children }: { value: string, children: React.ReactNode }) => <option value={value}>{children}</option>;
 
 export default Settings;
