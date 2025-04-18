@@ -13,6 +13,7 @@ export type CreateEmployeeInput = {
   department: string;
   status: 'active' | 'inactive';
   cost_rate: number;
+  phone?: string; // Added for optional phone number
 };
 
 export type UpdateEmployeeInput = {
@@ -33,14 +34,13 @@ export function useEmployees() {
 
         if (error) {
           console.error("Error fetching employees:", error);
-          return [] as Employee[];
+          throw error;
         }
 
-        // Transform the data to match our Employee type
         return (data || []) as Employee[];
       } catch (err) {
         console.error("Error in employee query:", err);
-        return [] as Employee[];
+        throw err;
       }
     }
   });

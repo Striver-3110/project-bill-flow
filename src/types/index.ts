@@ -1,3 +1,4 @@
+
 export interface Invoice {
   id: string;
   invoice_id?: string; // For backward compatibility
@@ -68,7 +69,7 @@ export interface Employee {
   first_name: string;
   last_name: string;
   email: string;
-  phone?: string; // Added for mock data compatibility
+  phone?: string; // Added for compatibility with mock data
   hire_date: string;
   designation: string;
   department: string;
