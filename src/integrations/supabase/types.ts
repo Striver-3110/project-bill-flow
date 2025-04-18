@@ -54,6 +54,48 @@ export type Database = {
         }
         Relationships: []
       }
+      employees: {
+        Row: {
+          cost_rate: number
+          created_at: string | null
+          department: string
+          designation: string
+          email: string
+          employee_id: string
+          first_name: string
+          hire_date: string
+          last_name: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          cost_rate?: number
+          created_at?: string | null
+          department: string
+          designation: string
+          email: string
+          employee_id?: string
+          first_name: string
+          hire_date: string
+          last_name: string
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          cost_rate?: number
+          created_at?: string | null
+          department?: string
+          designation?: string
+          email?: string
+          employee_id?: string
+          first_name?: string
+          hire_date?: string
+          last_name?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       invoice_line_items: {
         Row: {
           amount: number

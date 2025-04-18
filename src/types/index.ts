@@ -3,13 +3,13 @@ export interface Invoice {
   id: string;
   invoice_id?: string; // For backward compatibility
   client_id: string;
-  invoice_number?: string; // Added for ReminderDialog
+  invoice_number: string; // Required for ReminderDialog
   invoice_date: string;
   due_date: string;
   status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent'; // Added 'sent' status
   items: InvoiceItem[];
   total_amount: number;
-  currency?: string; // Added for ReminderDialog
+  currency: string; // Required for ReminderDialog
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -64,13 +64,13 @@ export interface Project {
   updated_at?: string;
 }
 
-// Update the Employee type to match our schema
+// Update the Employee type to match our Supabase schema
 export interface Employee {
   employee_id: string;
   first_name: string;
   last_name: string;
   email: string;
-  phone?: string; // Added for mock data
+  phone?: string; // Added for mock data compatibility
   hire_date: string;
   designation: string;
   department: string;

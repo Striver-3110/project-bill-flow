@@ -26,7 +26,6 @@ export function useEmployees() {
     queryKey: ['employees'],
     queryFn: async () => {
       try {
-        // First check if employees table exists by trying to query it
         const { data, error } = await supabase
           .from('employees')
           .select('*')
@@ -34,11 +33,11 @@ export function useEmployees() {
 
         if (error) {
           console.error("Error fetching employees:", error);
-          // If table doesn't exist or other error, return empty array
           return [] as Employee[];
         }
 
-        return data as Employee[];
+        // Transform the data to match our Employee type
+        return (data || []) as Employee[];
       } catch (err) {
         console.error("Error in employee query:", err);
         return [] as Employee[];
@@ -56,7 +55,7 @@ export function useEmployees() {
           .single();
 
         if (error) throw error;
-        return data;
+        return data as Employee;
       } catch (error) {
         console.error("Error in create mutation:", error);
         throw error;
@@ -85,7 +84,7 @@ export function useEmployees() {
           .single();
 
         if (error) throw error;
-        return data;
+        return data as Employee;
       } catch (error) {
         console.error("Error in update mutation:", error);
         throw error;
