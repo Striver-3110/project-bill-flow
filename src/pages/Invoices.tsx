@@ -16,6 +16,7 @@ import { CreateInvoiceSheet } from "@/components/invoices/CreateInvoiceSheet";
 import { InvoiceStats } from "@/components/invoices/InvoiceStats";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
+import { Invoice } from "@/types";
 
 export default function Invoices() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,6 +32,23 @@ export default function Invoices() {
     paid: filteredInvoices.filter(inv => inv.status === 'paid').length,
     sent: filteredInvoices.filter(inv => inv.status === 'sent').length,
     overdue: filteredInvoices.filter(inv => inv.status === 'overdue').length,
+  };
+
+  // Helper function to ensure status is of the correct type
+  const getValidStatus = (status: string): "paid" | "sent" | "overdue" | "draft" | "active" | "inactive" | "completed" | "on-hold" => {
+    switch(status) {
+      case 'paid':
+        return 'paid';
+      case 'sent':
+        return 'sent';
+      case 'overdue':
+        return 'overdue';
+      case 'draft':
+        return 'draft';
+      default:
+        // Fallback to draft if unknown status
+        return 'draft';
+    }
   };
 
   if (error) {
@@ -140,7 +158,7 @@ export default function Invoices() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={invoice.status} />
+                      <StatusBadge status={getValidStatus(invoice.status)} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button variant="ghost" size="sm" className="text-billflow-blue-600 mr-1">
