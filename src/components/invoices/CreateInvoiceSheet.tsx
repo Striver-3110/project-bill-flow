@@ -16,10 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useInvoices } from "@/hooks/use-invoices";
-import { InvoiceLineItem } from "@/types";
+import { useInvoices, CreateInvoiceInput } from "@/hooks/use-invoices";
+import { generateInvoiceNumber, calculateLineItemTotal } from "@/utils/invoiceUtils";
 
 // Define the form input types
 interface InvoiceFormInput {
@@ -42,11 +41,11 @@ interface InvoiceFormInput {
 export function CreateInvoiceSheet() {
   const [isOpen, setIsOpen] = useState(false);
   const [clients, setClients] = useState<{ id: string; client_name: string }[]>([]);
-  const queryClient = useQueryClient();
+  const { createInvoice, isCreating } = useInvoices();
   
   const form = useForm<InvoiceFormInput>({
     defaultValues: {
-      invoice_number: `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      invoice_number: generateInvoiceNumber(),
       client_id: "",
       invoice_date: new Date().toISOString().slice(0, 10),
       due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
@@ -91,87 +90,6 @@ export function CreateInvoiceSheet() {
     }
   }, [isOpen, form]);
 
-  // Create invoice mutation
-  const createInvoiceMutation = useMutation({
-    mutationFn: async (data: InvoiceFormInput) => {
-      // Calculate total amount from line items
-      const lineItems = data.line_items.map(item => ({
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        amount: item.quantity * item.unit_price,
-        tax_rate: item.tax_rate,
-        tax_amount: (item.quantity * item.unit_price * item.tax_rate) / 100,
-        total_amount: item.quantity * item.unit_price * (1 + item.tax_rate / 100)
-      }));
-      
-      const total_amount = lineItems.reduce((sum, item) => sum + item.total_amount, 0);
-
-      // Insert invoice
-      const { data: invoiceData, error: invoiceError } = await supabase
-        .from("invoices")
-        .insert({
-          invoice_number: data.invoice_number,
-          client_id: data.client_id,
-          invoice_date: data.invoice_date,
-          due_date: data.due_date,
-          billing_period_start: data.billing_period_start,
-          billing_period_end: data.billing_period_end,
-          status: data.status,
-          currency: data.currency,
-          total_amount: total_amount
-        })
-        .select("invoice_id")
-        .single();
-
-      if (invoiceError) throw invoiceError;
-
-      // Insert line items
-      for (const item of lineItems) {
-        const { error: lineItemError } = await supabase
-          .from("invoice_line_items")
-          .insert({
-            invoice_id: invoiceData.invoice_id,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            amount: item.amount,
-            tax_rate: item.tax_rate,
-            tax_amount: item.tax_amount,
-            total_amount: item.total_amount
-          });
-
-        if (lineItemError) throw lineItemError;
-      }
-
-      return invoiceData;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success("Invoice created successfully");
-      setIsOpen(false);
-      form.reset();
-    },
-    onError: (error) => {
-      console.error("Error creating invoice:", error);
-      toast.error("Failed to create invoice");
-    }
-  });
-
-  // Calculate line item totals
-  const calculateLineItemTotal = (index: number) => {
-    const lineItem = form.getValues().line_items[index];
-    const quantity = lineItem.quantity || 0;
-    const unitPrice = lineItem.unit_price || 0;
-    const taxRate = lineItem.tax_rate || 0;
-    
-    const subtotal = quantity * unitPrice;
-    const taxAmount = (subtotal * taxRate) / 100;
-    const total = subtotal + taxAmount;
-    
-    return { subtotal, taxAmount, total };
-  };
-
   // Add new line item
   const addLineItem = () => {
     const currentLineItems = form.getValues().line_items;
@@ -192,6 +110,16 @@ export function CreateInvoiceSheet() {
     }
   };
 
+  // Calculate line item totals
+  const getLineItemTotal = (index: number) => {
+    const lineItem = form.getValues().line_items[index];
+    const quantity = lineItem.quantity || 0;
+    const unitPrice = lineItem.unit_price || 0;
+    const taxRate = lineItem.tax_rate || 0;
+    
+    return calculateLineItemTotal(quantity, unitPrice, taxRate);
+  };
+
   // Calculate invoice total
   const calculateInvoiceTotal = () => {
     const lineItems = form.getValues().line_items;
@@ -199,7 +127,7 @@ export function CreateInvoiceSheet() {
     let taxTotal = 0;
     
     lineItems.forEach((_, index) => {
-      const { subtotal: itemSubtotal, taxAmount } = calculateLineItemTotal(index);
+      const { subtotal: itemSubtotal, taxAmount } = getLineItemTotal(index);
       subtotal += itemSubtotal;
       taxTotal += taxAmount;
     });
@@ -213,7 +141,56 @@ export function CreateInvoiceSheet() {
 
   // Handle form submission
   const onSubmit = (data: InvoiceFormInput) => {
-    createInvoiceMutation.mutate(data);
+    // Prepare line items with calculated totals
+    const lineItems = data.line_items.map(item => {
+      const { subtotal, taxAmount, total } = calculateLineItemTotal(
+        item.quantity || 0,
+        item.unit_price || 0,
+        item.tax_rate || 0
+      );
+
+      return {
+        description: item.description,
+        quantity: item.quantity || 0,
+        unit_price: item.unit_price || 0,
+        amount: subtotal,
+        tax_rate: item.tax_rate || 0,
+        tax_amount: taxAmount,
+        total_amount: total
+      };
+    });
+
+    // Create the invoice input object
+    const invoiceInput: CreateInvoiceInput = {
+      ...data,
+      total_amount: calculateInvoiceTotal().total,
+      line_items: lineItems
+    };
+
+    // Submit the invoice
+    createInvoice(invoiceInput, {
+      onSuccess: () => {
+        setIsOpen(false);
+        form.reset({
+          invoice_number: generateInvoiceNumber(),
+          client_id: data.client_id,
+          invoice_date: new Date().toISOString().slice(0, 10),
+          due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+          billing_period_start: new Date().toISOString().slice(0, 10),
+          billing_period_end: new Date().toISOString().slice(0, 10),
+          status: "draft",
+          currency: "USD",
+          line_items: [
+            {
+              description: "",
+              quantity: 1,
+              unit_price: 0,
+              tax_rate: 0,
+            }
+          ]
+        });
+      }
+    });
   };
 
   return (
@@ -498,21 +475,21 @@ export function CreateInvoiceSheet() {
                       {new Intl.NumberFormat('en-US', { 
                         style: 'currency', 
                         currency: form.getValues().currency 
-                      }).format(calculateLineItemTotal(index).subtotal)}
+                      }).format(getLineItemTotal(index).subtotal)}
                     </div>
                     <div>
                       <span className="font-medium">Tax:</span>{" "}
                       {new Intl.NumberFormat('en-US', { 
                         style: 'currency', 
                         currency: form.getValues().currency 
-                      }).format(calculateLineItemTotal(index).taxAmount)}
+                      }).format(getLineItemTotal(index).taxAmount)}
                     </div>
                     <div>
                       <span className="font-medium">Total:</span>{" "}
                       {new Intl.NumberFormat('en-US', { 
                         style: 'currency', 
                         currency: form.getValues().currency 
-                      }).format(calculateLineItemTotal(index).total)}
+                      }).format(getLineItemTotal(index).total)}
                     </div>
                   </div>
                 </div>
@@ -554,9 +531,9 @@ export function CreateInvoiceSheet() {
               <Button
                 type="submit"
                 className="w-full md:w-auto bg-billflow-blue-600 hover:bg-billflow-blue-700"
-                disabled={createInvoiceMutation.isPending}
+                disabled={isCreating}
               >
-                {createInvoiceMutation.isPending ? (
+                {isCreating ? (
                   "Creating..."
                 ) : (
                   <>
