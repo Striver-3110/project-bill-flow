@@ -1,22 +1,11 @@
-
 import React, { useState } from "react";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash, 
-  Mail, 
-  Phone, 
-  Users, 
-  Building, 
-  Calendar
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, Edit, Trash, Mail, Phone, Users, Building, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status-badge";
 import { clients } from "@/data/mockData";
 import { formatDate } from "@/utils/invoiceUtils";
+import AddClientDialog from "@/components/clients/AddClientDialog";
 
 const Clients = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,10 +24,7 @@ const Clients = () => {
             Manage your client relationships
           </p>
         </div>
-        <Button className="bg-billflow-blue-600 hover:bg-billflow-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Client
-        </Button>
+        <AddClientDialog />
       </div>
 
       {/* Filters and Search */}
@@ -158,10 +144,7 @@ const Clients = () => {
             <p className="text-sm text-billflow-gray-500 mt-1">
               Try adjusting your search or add a new client
             </p>
-            <Button className="mt-3 bg-billflow-blue-600 hover:bg-billflow-blue-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Client
-            </Button>
+            
           </div>
         )}
       </div>
