@@ -25,41 +25,42 @@ export function useEmployees() {
   const { data: employees, isLoading, error } = useQuery({
     queryKey: ['employees'],
     queryFn: async () => {
-      // Check if the employees table exists first
-      const { data: tables, error: tablesError } = await supabase
-        .from('employees')
-        .select('*')
-        .limit(1);
-      
-      if (tablesError) {
-        console.error("Error checking employees table:", tablesError);
-        // If table doesn't exist, return empty array to avoid further errors
-        if (tablesError.code === "PGRST116") {
+      try {
+        // First check if employees table exists by trying to query it
+        const { data, error } = await supabase
+          .from('employees')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching employees:", error);
+          // If table doesn't exist or other error, return empty array
           return [] as Employee[];
         }
-        throw tablesError;
-      }
-      
-      const { data, error } = await supabase
-        .from('employees')
-        .select('*')
-        .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data as Employee[];
+        return data as Employee[];
+      } catch (err) {
+        console.error("Error in employee query:", err);
+        return [] as Employee[];
+      }
     }
   });
 
   const createEmployeeMutation = useMutation({
     mutationFn: async (input: CreateEmployeeInput) => {
-      const { data, error } = await supabase
-        .from('employees')
-        .insert([input])
-        .select()
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('employees')
+          .insert([input])
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error("Error in create mutation:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -74,15 +75,21 @@ export function useEmployees() {
   const updateEmployeeMutation = useMutation({
     mutationFn: async (input: UpdateEmployeeInput) => {
       const { employee_id, ...updateData } = input;
-      const { data, error } = await supabase
-        .from('employees')
-        .update(updateData)
-        .eq('employee_id', employee_id)
-        .select()
-        .single();
+      
+      try {
+        const { data, error } = await supabase
+          .from('employees')
+          .update(updateData)
+          .eq('employee_id', employee_id)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error("Error in update mutation:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -96,12 +103,17 @@ export function useEmployees() {
 
   const deleteEmployeeMutation = useMutation({
     mutationFn: async (employeeId: string) => {
-      const { error } = await supabase
-        .from('employees')
-        .delete()
-        .eq('employee_id', employeeId);
-      
-      if (error) throw error;
+      try {
+        const { error } = await supabase
+          .from('employees')
+          .delete()
+          .eq('employee_id', employeeId);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error("Error in delete mutation:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });

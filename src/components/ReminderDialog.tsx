@@ -33,9 +33,12 @@ const ReminderDialog: React.FC<ReminderDialogProps> = ({
   // Pre-populated reminder message based on invoice details
   React.useEffect(() => {
     if (invoice) {
+      const invoiceNumber = invoice.invoice_number || 'N/A';
+      const invoiceTotal = formatCurrency(invoice.total_amount, invoice.currency || 'USD');
+      
       const defaultMessage = `Dear ${clientName},
 
-We hope this message finds you well. This is a friendly reminder that invoice ${invoice.invoice_number}, issued on ${formatDate(invoice.invoice_date)} for ${formatCurrency(invoice.total_amount, invoice.currency)}, is currently past due.
+We hope this message finds you well. This is a friendly reminder that invoice ${invoiceNumber}, issued on ${formatDate(invoice.invoice_date)} for ${invoiceTotal}, is currently past due.
 
 The payment was due on ${formatDate(invoice.due_date)}. We would appreciate it if you could settle this invoice at your earliest convenience.
 
@@ -67,6 +70,9 @@ BillFlow Team`;
 
   if (!invoice) return null;
 
+  const invoiceNumber = invoice.invoice_number || 'N/A';
+  const invoiceCurrency = invoice.currency || 'USD';
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
@@ -76,7 +82,7 @@ BillFlow Team`;
             Send Payment Reminder
           </DialogTitle>
           <DialogDescription>
-            Send a reminder email to {clientName} for invoice {invoice.invoice_number}.
+            Send a reminder email to {clientName} for invoice {invoiceNumber}.
           </DialogDescription>
         </DialogHeader>
         
@@ -84,7 +90,7 @@ BillFlow Team`;
           <div className="space-y-2">
             <div className="flex justify-between py-2 px-3 bg-billflow-gray-50 rounded-md text-sm">
               <span className="text-billflow-gray-600">Invoice</span>
-              <span className="font-medium">{invoice.invoice_number}</span>
+              <span className="font-medium">{invoiceNumber}</span>
             </div>
             <div className="flex justify-between py-2 px-3 bg-billflow-gray-50 rounded-md text-sm">
               <span className="text-billflow-gray-600">Due Date</span>
@@ -92,7 +98,7 @@ BillFlow Team`;
             </div>
             <div className="flex justify-between py-2 px-3 bg-billflow-gray-50 rounded-md text-sm">
               <span className="text-billflow-gray-600">Amount</span>
-              <span className="font-medium">{formatCurrency(invoice.total_amount, invoice.currency)}</span>
+              <span className="font-medium">{formatCurrency(invoice.total_amount, invoiceCurrency)}</span>
             </div>
           </div>
           
