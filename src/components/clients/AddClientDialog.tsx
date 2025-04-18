@@ -42,9 +42,10 @@ export default function AddClientDialog() {
 
   const onSubmit = async (data: ClientFormValues) => {
     try {
+      // Fix: Pass data directly as a single object, not as an array
       const { error } = await supabase
         .from('clients')
-        .insert([data]);
+        .insert(data); // Don't wrap in array brackets
 
       if (error) throw error;
 
