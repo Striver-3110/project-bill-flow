@@ -13,7 +13,7 @@ export type CreateEmployeeInput = {
   department: string;
   status: 'active' | 'inactive';
   cost_rate: number;
-  phone?: string; // Added for optional phone number
+  phone?: string; // Ensure this is optional
 };
 
 export type UpdateEmployeeInput = {

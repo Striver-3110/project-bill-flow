@@ -65,6 +65,7 @@ export type Database = {
           first_name: string
           hire_date: string
           last_name: string
+          phone: string | null
           status: string
           updated_at: string | null
         }
@@ -78,6 +79,7 @@ export type Database = {
           first_name: string
           hire_date: string
           last_name: string
+          phone?: string | null
           status: string
           updated_at?: string | null
         }
@@ -91,6 +93,7 @@ export type Database = {
           first_name?: string
           hire_date?: string
           last_name?: string
+          phone?: string | null
           status?: string
           updated_at?: string | null
         }

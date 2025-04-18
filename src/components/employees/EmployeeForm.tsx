@@ -1,4 +1,3 @@
-
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -27,7 +26,12 @@ const formSchema = z.object({
   first_name: z.string().min(2, "First name must be at least 2 characters"),
   last_name: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
+  phone: z.string()
+    .optional()
+    .refine(
+      (val) => val === undefined || val === "" || /^\+?[1-9]\d{1,14}$/.test(val), 
+      "Please enter a valid phone number"
+    ),
   hire_date: z.string().min(1, "Please select a hire date"),
   designation: z.string().min(2, "Designation must be at least 2 characters"),
   department: z.string().min(2, "Department must be at least 2 characters"),
@@ -139,9 +143,12 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel>Phone Number (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1 (555) 123-4567" {...field} />
+                    <Input 
+                      placeholder="+1 (555) 123-4567" 
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
