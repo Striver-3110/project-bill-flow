@@ -19,12 +19,13 @@ export interface Employee {
   first_name: string;
   last_name: string;
   email: string;
-  phone: string;
   hire_date: string;
   designation: string;
   department: string;
   status: 'active' | 'inactive';
   cost_rate: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Project Types

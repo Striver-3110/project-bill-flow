@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Users,
@@ -8,6 +8,8 @@ import {
   Briefcase,
   Calendar,
   DollarSign,
+  UserPlus,
+  Search,
 } from "lucide-react";
 import StatsCard from "@/components/ui/stats-card";
 import {
@@ -23,6 +25,12 @@ import {
   Cell,
 } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import EmployeeList from "@/components/employees/EmployeeList";
+import EmployeeDialog from "@/components/employees/EmployeeDialog";
+import { useEmployees, CreateEmployeeInput, UpdateEmployeeInput } from "@/hooks/use-employees";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Mock data based on the schema
 const employeeStats = {
@@ -49,18 +57,54 @@ const projectDistributionData = [
 ];
 
 const Employees = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const { employees, isLoading, createEmployee, updateEmployee, deleteEmployee, isCreating, isUpdating, isDeleting } = useEmployees();
+
+  const handleCreateEmployee = (data: CreateEmployeeInput) => {
+    createEmployee(data);
+    setShowAddDialog(false);
+  };
+
+  const filteredEmployees = employees?.filter(
+    (employee) =>
+      employee.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.department.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Recalculate stats based on actual data
+  const actualStats = employees ? {
+    totalEmployees: employees.length,
+    activeEmployees: employees.filter(e => e.status === 'active').length,
+    totalHours: 0, // This would come from time entries
+    averageBillableHours: 0, // This would be calculated from time entries
+    activeAssignments: 0, // This would come from assignments
+    totalProjects: 0, // This would come from projects
+  } : employeeStats;
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Employee Management</h1>
+        <Button onClick={() => setShowAddDialog(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add Employee
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           title="Total Employees"
-          value={employeeStats.totalEmployees}
+          value={actualStats.totalEmployees}
           icon={Users}
           description="All registered employees"
         />
         <StatsCard
           title="Active Employees"
-          value={employeeStats.activeEmployees}
+          value={actualStats.activeEmployees}
           icon={UserCheck}
           description="Currently active"
           variant="success"
@@ -94,6 +138,33 @@ const Employees = () => {
           variant="success"
         />
       </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            placeholder="Search employees..."
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-md" />
+          <Skeleton className="h-64 w-full rounded-md" />
+        </div>
+      ) : (
+        <EmployeeList
+          employees={filteredEmployees || []}
+          onUpdateEmployee={updateEmployee}
+          onDeleteEmployee={deleteEmployee}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
+        />
+      )}
 
       <Tabs defaultValue="timeEntries" className="space-y-4">
         <TabsList>
@@ -152,6 +223,14 @@ const Employees = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <EmployeeDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onSubmit={handleCreateEmployee}
+        isSubmitting={isCreating}
+        mode="create"
+      />
     </div>
   );
 };
