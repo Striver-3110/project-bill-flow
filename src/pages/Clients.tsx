@@ -3,19 +3,68 @@ import React, { useState } from "react";
 import { Search, Edit, Trash, Mail, Phone, Users, Building, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button"; // Added Button import
+import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/ui/status-badge";
-import { clients } from "@/data/mockData";
 import { formatDate } from "@/utils/invoiceUtils";
 import AddClientDialog from "@/components/clients/AddClientDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Clients = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredClients = clients.filter(client =>
+  // Fetch clients data
+  const { data: clients, isLoading, error } = useQuery({
+    queryKey: ['clients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Delete client function
+  const deleteClient = async (clientId: string) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', clientId);
+
+      if (error) throw error;
+      toast.success("Client deleted successfully");
+    } catch (error) {
+      toast.error("Error deleting client");
+      console.error("Error deleting client:", error);
+    }
+  };
+
+  // Filter clients based on search query
+  const filteredClients = clients?.filter(client =>
     client.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.contact_person.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-billflow-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-red-500">Error loading clients</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -84,7 +133,7 @@ const Clients = () => {
             </thead>
             <tbody className="bg-white divide-y divide-billflow-gray-200">
               {filteredClients.map((client) => (
-                <tr key={client.client_id} className="hover:bg-billflow-gray-50">
+                <tr key={client.id} className="hover:bg-billflow-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 rounded-full bg-billflow-blue-100 flex items-center justify-center">
@@ -94,7 +143,7 @@ const Clients = () => {
                         <div className="text-sm font-medium text-billflow-gray-900">{client.client_name}</div>
                         <div className="text-sm text-billflow-gray-500 flex items-center">
                           <Building className="h-3 w-3 mr-1" />
-                          {client.address.split(',')[0]}
+                          {client.address?.split(',')[0] || 'No address'}
                         </div>
                       </div>
                     </div>
@@ -107,7 +156,7 @@ const Clients = () => {
                     </div>
                     <div className="text-sm text-billflow-gray-500 flex items-center">
                       <Phone className="h-3 w-3 mr-1" />
-                      {client.contact_phone}
+                      {client.contact_phone || 'No phone'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -121,16 +170,21 @@ const Clients = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-billflow-gray-900">{client.payment_terms}</div>
+                    <div className="text-sm text-billflow-gray-900">{client.payment_terms || 'Not specified'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={client.status} />
+                    <StatusBadge status={client.status || 'active'} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Button variant="ghost" size="sm" className="text-billflow-blue-600 mr-2">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-billflow-gray-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-billflow-gray-600"
+                      onClick={() => deleteClient(client.id)}
+                    >
                       <Trash className="h-4 w-4" />
                     </Button>
                   </td>
@@ -146,7 +200,6 @@ const Clients = () => {
             <p className="text-sm text-billflow-gray-500 mt-1">
               Try adjusting your search or add a new client
             </p>
-            
           </div>
         )}
       </div>
