@@ -54,6 +54,106 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_line_items: {
+        Row: {
+          amount: number
+          description: string
+          invoice_id: string
+          line_item_id: string
+          quantity: number
+          tax_amount: number | null
+          tax_rate: number | null
+          total_amount: number
+          unit_price: number
+        }
+        Insert: {
+          amount: number
+          description: string
+          invoice_id: string
+          line_item_id?: string
+          quantity?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount: number
+          unit_price: number
+        }
+        Update: {
+          amount?: number
+          description?: string
+          invoice_id?: string
+          line_item_id?: string
+          quantity?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["invoice_id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          billing_period_end: string
+          billing_period_start: string
+          client_id: string
+          created_at: string | null
+          currency: string
+          due_date: string
+          invoice_date: string
+          invoice_id: string
+          invoice_number: string
+          payment_date: string | null
+          status: string
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          billing_period_end: string
+          billing_period_start: string
+          client_id: string
+          created_at?: string | null
+          currency?: string
+          due_date: string
+          invoice_date: string
+          invoice_id?: string
+          invoice_number: string
+          payment_date?: string | null
+          status: string
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          billing_period_end?: string
+          billing_period_start?: string
+          client_id?: string
+          created_at?: string | null
+          currency?: string
+          due_date?: string
+          invoice_date?: string
+          invoice_id?: string
+          invoice_number?: string
+          payment_date?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
