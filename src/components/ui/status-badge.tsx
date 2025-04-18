@@ -3,7 +3,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'active' | 'inactive' | 'completed' | 'on-hold';
+  status: 'draft' | 'pending' | 'sent' | 'paid' | 'overdue' | 'active' | 'inactive' | 'completed' | 'on-hold';
   className?: string;
 }
 
@@ -12,6 +12,8 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
     switch (status) {
       case 'draft':
         return "bg-billflow-gray-200 text-billflow-gray-700";
+      case 'pending':
+        return "bg-yellow-100 text-yellow-700";
       case 'sent':
         return "bg-billflow-blue-100 text-billflow-blue-700";
       case 'paid':

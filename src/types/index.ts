@@ -1,4 +1,3 @@
-
 export interface Invoice {
   id: string;
   invoice_id?: string; // For backward compatibility
@@ -6,7 +5,7 @@ export interface Invoice {
   invoice_number: string; // Required for ReminderDialog
   invoice_date: string;
   due_date: string;
-  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent'; // Added 'sent' status
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent'; // Updated to include 'pending'
   items: InvoiceItem[];
   total_amount: number;
   currency: string; // Required for ReminderDialog
@@ -64,7 +63,6 @@ export interface Project {
   updated_at?: string;
 }
 
-// Update the Employee type to match our Supabase schema
 export interface Employee {
   employee_id: string;
   first_name: string;
@@ -80,7 +78,6 @@ export interface Employee {
   updated_at?: string;
 }
 
-// Add additional required types for mockData.ts
 export interface Assignment {
   assignment_id: string;
   employee_id: string;

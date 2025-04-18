@@ -14,6 +14,33 @@ import StatusBadge from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
 import { dashboardStats, invoices } from "@/data/mockData";
 
+// Helper function to ensure status is of the correct type
+const getValidStatus = (status: string): "draft" | "pending" | "sent" | "paid" | "overdue" | "active" | "inactive" | "completed" | "on-hold" => {
+  switch(status) {
+    case 'draft':
+      return 'draft';
+    case 'pending':
+      return 'pending';
+    case 'sent':
+      return 'sent';
+    case 'paid':
+      return 'paid';
+    case 'overdue':
+      return 'overdue';
+    case 'active':
+      return 'active';
+    case 'inactive':
+      return 'inactive';
+    case 'completed':
+      return 'completed';
+    case 'on-hold':
+      return 'on-hold';
+    default:
+      // Fallback to draft if unknown status
+      return 'draft';
+  }
+};
+
 const Dashboard = () => {
   return (
     <div className="space-y-6">
@@ -75,7 +102,7 @@ const Dashboard = () => {
                   <p className="font-medium text-billflow-gray-900">
                     {formatCurrency(invoice.total_amount)}
                   </p>
-                  <StatusBadge status={invoice.status} className="mt-1" />
+                  <StatusBadge status={getValidStatus(invoice.status)} className="mt-1" />
                 </div>
               </div>
             ))}
@@ -101,7 +128,7 @@ const Dashboard = () => {
                   <p className="font-medium text-billflow-gray-900">
                     {formatCurrency(totalBilled)}
                   </p>
-                  <StatusBadge status={client.status} className="mt-1" />
+                  <StatusBadge status={getValidStatus(client.status || 'active')} className="mt-1" />
                 </div>
               </div>
             ))}
@@ -181,7 +208,7 @@ const Dashboard = () => {
                     {formatCurrency(invoice.total_amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={invoice.status} />
+                    <StatusBadge status={getValidStatus(invoice.status)} />
                   </td>
                 </tr>
               ))}
