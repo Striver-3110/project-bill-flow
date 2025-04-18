@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,11 +5,12 @@ import {
   Briefcase, CheckCircle, Clock, AlertCircle, Users, Calendar, 
   DollarSign, PieChartIcon, BarChart2, FileText, Timer, UserCheck 
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import StatsCard from "@/components/ui/stats-card";
 import StatusBadge from "@/components/ui/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { NewProjectDialog } from "@/components/projects/NewProjectDialog";
+import { useProjects } from "@/hooks/use-projects";
 import {
   ResponsiveContainer,
   PieChart,
@@ -27,106 +27,53 @@ import {
   Legend,
 } from "recharts";
 
-// Mock data based on the schema
-const projectStats = {
-  totalProjects: 24,
-  completedProjects: 15,
-  ongoingProjects: 7,
-  onHoldProjects: 2,
-  activeAssignments: 38,
-  totalEmployeesAssigned: 45,
-  totalHoursLogged: 4280,
-  totalBillableAmount: 427600,
-};
-
-const statusData = [
-  { name: "Active", value: 7, color: "#10B981" },
-  { name: "Completed", value: 15, color: "#6366F1" },
-  { name: "On Hold", value: 2, color: "#F59E0B" },
-];
-
-// Update project statuses to match the expected types in StatusBadge
-const recentProjects = [
-  {
-    id: "1",
-    projectName: "Website Redesign",
-    clientName: "Tech Solutions Inc.",
-    startDate: "2024-01-15",
-    endDate: "2024-06-30",
-    status: "active" as const,
-    assignedEmployees: 5,
-    budget: 75000,
-    hoursLogged: 720,
-    percentComplete: 45,
-  },
-  {
-    id: "2",
-    projectName: "Mobile App Development",
-    clientName: "Startup Inc",
-    startDate: "2024-02-01",
-    endDate: "2024-08-15",
-    status: "active" as const,
-    assignedEmployees: 8,
-    budget: 120000,
-    hoursLogged: 840,
-    percentComplete: 35,
-  },
-  {
-    id: "3",
-    projectName: "Data Migration",
-    clientName: "Corp Solutions",
-    startDate: "2024-01-01",
-    endDate: "2024-03-31",
-    status: "completed" as const,
-    assignedEmployees: 4,
-    budget: 45000,
-    hoursLogged: 620,
-    percentComplete: 100,
-  },
-  {
-    id: "4",
-    projectName: "Security Audit",
-    clientName: "Global Services Ltd.",
-    startDate: "2024-02-15",
-    endDate: "2024-04-15",
-    status: "on-hold" as const,
-    assignedEmployees: 3,
-    budget: 35000,
-    hoursLogged: 210,
-    percentComplete: 60,
-  },
-];
-
-const monthlyHoursData = [
-  { month: "Jan", hours: 720, billable: 680, target: 800 },
-  { month: "Feb", hours: 680, billable: 650, target: 800 },
-  { month: "Mar", hours: 750, billable: 720, target: 800 },
-  { month: "Apr", hours: 800, billable: 780, target: 800 },
-  { month: "May", hours: 720, billable: 700, target: 800 },
-  { month: "Jun", hours: 840, billable: 820, target: 800 },
-];
-
-const teamAssignmentData = [
-  { name: "Engineering", value: 18, color: "#3B82F6" },
-  { name: "Design", value: 12, color: "#EC4899" },
-  { name: "QA", value: 8, color: "#10B981" },
-  { name: "Management", value: 7, color: "#F59E0B" },
-];
-
-const topEmployees = [
-  { name: "David Anderson", hours: 168, utilization: 96, role: "Senior Developer" },
-  { name: "Lisa Martinez", hours: 160, utilization: 92, role: "Project Manager" },
-  { name: "James Wilson", hours: 155, utilization: 88, role: "UX Designer" },
-  { name: "Emily Taylor", hours: 150, utilization: 86, role: "Business Analyst" },
-];
-
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { projects, projectStats, isLoadingProjects } = useProjects();
   
-  const filteredProjects = recentProjects.filter(
-    project => project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-              project.clientName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProjects = projects?.filter(
+    project => 
+      project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      project.client?.client_name.toLowerCase().includes(searchTerm.toLowerCase())
+  ) ?? [];
+
+  const projectStatistics = {
+    totalProjects: projects?.length ?? 0,
+    activeProjects: projects?.filter(p => p.status === 'ACTIVE').length ?? 0,
+    completedProjects: projects?.filter(p => p.status === 'COMPLETED').length ?? 0,
+    onHoldProjects: projects?.filter(p => p.status === 'ON_HOLD').length ?? 0,
+    totalEmployeesAssigned: projectStats?.reduce((acc, curr) => acc + (curr.team_size ?? 0), 0) ?? 0,
+    totalHoursLogged: projectStats?.reduce((acc, curr) => acc + (curr.total_hours ?? 0), 0) ?? 0,
+  };
+
+  const statusData = [
+    { name: "Active", value: projectStatistics.activeProjects, color: "#10B981" },
+    { name: "Completed", value: projectStatistics.completedProjects, color: "#6366F1" },
+    { name: "On Hold", value: projectStatistics.onHoldProjects, color: "#F59E0B" },
+  ];
+
+  const monthlyHoursData = [
+    { month: "Jan", hours: 720, billable: 680, target: 800 },
+    { month: "Feb", hours: 680, billable: 650, target: 800 },
+    { month: "Mar", hours: 750, billable: 720, target: 800 },
+    { month: "Apr", hours: 800, billable: 780, target: 800 },
+    { month: "May", hours: 720, billable: 700, target: 800 },
+    { month: "Jun", hours: 840, billable: 820, target: 800 },
+  ];
+
+  const teamAssignmentData = [
+    { name: "Engineering", value: 18, color: "#3B82F6" },
+    { name: "Design", value: 12, color: "#EC4899" },
+    { name: "QA", value: 8, color: "#10B981" },
+    { name: "Management", value: 7, color: "#F59E0B" },
+  ];
+
+  const topEmployees = [
+    { name: "David Anderson", hours: 168, utilization: 96, role: "Senior Developer" },
+    { name: "Lisa Martinez", hours: 160, utilization: 92, role: "Project Manager" },
+    { name: "James Wilson", hours: 155, utilization: 88, role: "UX Designer" },
+    { name: "Emily Taylor", hours: 150, utilization: 86, role: "Business Analyst" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -140,10 +87,7 @@ const Projects = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-[250px]"
           />
-          <Button>
-            <Briefcase className="mr-2 h-4 w-4" />
-            New Project
-          </Button>
+          <NewProjectDialog />
         </div>
       </div>
 
@@ -151,27 +95,27 @@ const Projects = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Projects"
-          value={projectStats.totalProjects}
+          value={projectStatistics.totalProjects}
           icon={Briefcase}
           description="All projects"
         />
         <StatsCard
           title="Active Projects"
-          value={projectStats.ongoingProjects}
+          value={projectStatistics.activeProjects}
           icon={Clock}
           description="In progress"
           variant="primary"
         />
         <StatsCard
           title="Completed"
-          value={projectStats.completedProjects}
+          value={projectStatistics.completedProjects}
           icon={CheckCircle}
           description="Successfully delivered"
           variant="success"
         />
         <StatsCard
           title="On Hold"
-          value={projectStats.onHoldProjects}
+          value={projectStatistics.onHoldProjects}
           icon={AlertCircle}
           description="Temporarily paused"
           variant="warning"
@@ -181,28 +125,28 @@ const Projects = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Team Members"
-          value={projectStats.totalEmployeesAssigned}
+          value={projectStatistics.totalEmployeesAssigned}
           icon={Users}
           description="Assigned employees"
           variant="default"
         />
         <StatsCard
           title="Active Assignments"
-          value={projectStats.activeAssignments}
+          value={38}
           icon={UserCheck}
           description="Current assignments"
           variant="primary"
         />
         <StatsCard
           title="Total Hours"
-          value={projectStats.totalHoursLogged.toLocaleString()}
+          value={projectStatistics.totalHoursLogged.toLocaleString()}
           icon={Timer}
           description="Hours logged"
           variant="default"
         />
         <StatsCard
           title="Billable Amount"
-          value={`$${projectStats.totalBillableAmount.toLocaleString()}`}
+          value={`$${427600}`}
           icon={DollarSign}
           description="Billable revenue"
           variant="success"
@@ -241,33 +185,33 @@ const Projects = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredProjects.map((project) => (
-                    <TableRow key={project.id}>
+                    <TableRow key={project.project_id}>
                       <TableCell className="font-medium">
-                        {project.projectName}
+                        {project.project_name}
                       </TableCell>
-                      <TableCell>{project.clientName}</TableCell>
+                      <TableCell>{project.client?.client_name}</TableCell>
                       <TableCell>
-                        {project.startDate} to {project.endDate}
+                        {project.start_date} to {project.end_date}
                       </TableCell>
                       <TableCell>
-                        <StatusBadge status={project.status} />
+                        <StatusBadge status={project.status.toLowerCase() as any} />
                       </TableCell>
-                      <TableCell>{project.assignedEmployees}</TableCell>
+                      <TableCell>{projectStatistics.totalEmployeesAssigned}</TableCell>
                       <TableCell>${project.budget.toLocaleString()}</TableCell>
                       <TableCell>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                           <div 
                             className={`h-2.5 rounded-full ${
-                              project.status === "completed" 
+                              project.status === "COMPLETED" 
                                 ? "bg-green-600" 
-                                : project.status === "on-hold" 
+                                : project.status === "ON_HOLD" 
                                 ? "bg-yellow-500" 
                                 : "bg-blue-600"
                             }`}
-                            style={{ width: `${project.percentComplete}%` }}
+                            style={{ width: `${50}%` }}
                           ></div>
                         </div>
-                        <span className="text-xs text-gray-500 mt-1">{project.percentComplete}%</span>
+                        <span className="text-xs text-gray-500 mt-1">{50}%</span>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -458,11 +402,11 @@ const Projects = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredProjects.map((project) => (
-                      <TableRow key={project.id}>
-                        <TableCell className="font-medium">{project.projectName}</TableCell>
-                        <TableCell>{project.clientName}</TableCell>
-                        <TableCell>{project.hoursLogged}</TableCell>
-                        <TableCell>${(project.hoursLogged * 100).toLocaleString()}</TableCell>
+                      <TableRow key={project.project_id}>
+                        <TableCell className="font-medium">{project.project_name}</TableCell>
+                        <TableCell>{project.client?.client_name}</TableCell>
+                        <TableCell>{100}</TableCell>
+                        <TableCell>${(100 * 100).toLocaleString()}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -471,10 +415,10 @@ const Projects = () => {
                       <td className="p-4">Total</td>
                       <td></td>
                       <td className="p-4">
-                        {recentProjects.reduce((sum, p) => sum + p.hoursLogged, 0)}
+                        {filteredProjects.reduce((sum, p) => sum + 100, 0)}
                       </td>
                       <td className="p-4">
-                        ${recentProjects.reduce((sum, p) => sum + p.hoursLogged * 100, 0).toLocaleString()}
+                        ${filteredProjects.reduce((sum, p) => sum + 100 * 100, 0).toLocaleString()}
                       </td>
                     </tr>
                   </tfoot>

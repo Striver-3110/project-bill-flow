@@ -199,15 +199,187 @@ export type Database = {
           },
         ]
       }
+      project_assignments: {
+        Row: {
+          assignment_id: string
+          created_at: string | null
+          employee_id: string | null
+          end_date: string | null
+          project_id: string | null
+          role: string
+          start_date: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          assignment_id?: string
+          created_at?: string | null
+          employee_id?: string | null
+          end_date?: string | null
+          project_id?: string | null
+          role: string
+          start_date: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string | null
+          employee_id?: string | null
+          end_date?: string | null
+          project_id?: string | null
+          role?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_statistics"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          budget: number
+          client_id: string
+          created_at: string | null
+          description: string | null
+          end_date: string
+          project_id: string
+          project_name: string
+          start_date: string
+          status: Database["public"]["Enums"]["project_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          budget?: number
+          client_id: string
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          project_id?: string
+          project_name: string
+          start_date: string
+          status?: Database["public"]["Enums"]["project_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          budget?: number
+          client_id?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          project_id?: string
+          project_name?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["project_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_entries: {
+        Row: {
+          billable: boolean | null
+          created_at: string | null
+          date: string
+          description: string | null
+          employee_id: string | null
+          hours: number
+          project_id: string | null
+          time_entry_id: string
+        }
+        Insert: {
+          billable?: boolean | null
+          created_at?: string | null
+          date: string
+          description?: string | null
+          employee_id?: string | null
+          hours: number
+          project_id?: string | null
+          time_entry_id?: string
+        }
+        Update: {
+          billable?: boolean | null
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          employee_id?: string | null
+          hours?: number
+          project_id?: string | null
+          time_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "time_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_statistics"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "time_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      project_statistics: {
+        Row: {
+          budget: number | null
+          progress_percentage: number | null
+          project_id: string | null
+          project_name: string | null
+          status: Database["public"]["Enums"]["project_status"] | null
+          team_size: number | null
+          total_hours: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      assignment_status: "ACTIVE" | "COMPLETED"
+      project_status: "ACTIVE" | "COMPLETED" | "ON_HOLD"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -322,6 +494,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      assignment_status: ["ACTIVE", "COMPLETED"],
+      project_status: ["ACTIVE", "COMPLETED", "ON_HOLD"],
+    },
   },
 } as const
