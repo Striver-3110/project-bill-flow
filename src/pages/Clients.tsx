@@ -96,7 +96,7 @@ const Clients = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-y-auto scrollbar-none">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-billflow-gray-900">Clients</h1>

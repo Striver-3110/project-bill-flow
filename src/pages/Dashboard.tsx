@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   BarChart as BarChartIcon, 
@@ -32,7 +31,6 @@ import {
   Line
 } from "recharts";
 
-// Helper function to ensure status is of the correct type
 const getValidStatus = (status: string): "draft" | "pending" | "sent" | "paid" | "overdue" | "active" | "inactive" | "completed" | "on-hold" => {
   switch(status) {
     case 'draft':
@@ -54,7 +52,6 @@ const getValidStatus = (status: string): "draft" | "pending" | "sent" | "paid" |
     case 'on-hold':
       return 'on-hold';
     default:
-      // Fallback to draft if unknown status
       return 'draft';
   }
 };
@@ -64,17 +61,14 @@ const Dashboard = () => {
   const { invoices, isLoading: isLoadingInvoices } = useInvoices();
   const [timeFrame, setTimeFrame] = useState('6months');
 
-  // Filter project data
   const activeProjects = projects?.filter(p => p.status === 'ACTIVE') || [];
   const completedProjects = projects?.filter(p => p.status === 'COMPLETED') || [];
   const onHoldProjects = projects?.filter(p => p.status === 'ON_HOLD') || [];
 
-  // Calculate project statistics
   const totalProjects = projects?.length || 0;
   const totalBudget = projects?.reduce((sum, p) => sum + (p.budget || 0), 0) || 0;
   const totalHours = timeEntries?.reduce((sum, entry) => sum + (entry.hours || 0), 0) || 0;
 
-  // Calculate invoice statistics
   const totalInvoiced = invoices?.reduce((sum, inv) => sum + inv.total_amount, 0) || 0;
   const totalPaid = invoices?.filter(inv => inv.status === 'paid')
     .reduce((sum, inv) => sum + inv.total_amount, 0) || 0;
@@ -83,12 +77,10 @@ const Dashboard = () => {
   const totalDraft = invoices?.filter(inv => inv.status === 'draft')
     .reduce((sum, inv) => sum + inv.total_amount, 0) || 0;
 
-  // Get recent invoices (sorted by date)
   const recentInvoices = [...(invoices || [])]
     .sort((a, b) => new Date(b.invoice_date).getTime() - new Date(a.invoice_date).getTime())
     .slice(0, 5);
 
-  // Get upcoming invoices (due soon but not paid)
   const upcomingInvoices = [...(invoices || [])]
     .filter(inv => 
       (inv.status === 'sent' || inv.status === 'pending') && 
@@ -97,7 +89,6 @@ const Dashboard = () => {
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
     .slice(0, 5);
 
-  // Create top clients from invoice data
   const clientInvoiceMap = new Map();
   invoices?.forEach(invoice => {
     if (!invoice.client_id) return;
@@ -119,12 +110,10 @@ const Dashboard = () => {
     .sort((a, b) => b.total_billed - a.total_billed)
     .slice(0, 5);
 
-  // Revenue data for the monthly chart - use real data if available
   const revenueData = getMonthlyRevenueData();
 
   function getMonthlyRevenueData() {
     if (!invoices || invoices.length === 0) {
-      // Fallback to sample data if no invoices
       return [
         { month: 'Jan', revenue: 12500 },
         { month: 'Feb', revenue: 18200 },
@@ -135,7 +124,6 @@ const Dashboard = () => {
       ];
     }
     
-    // Group invoices by month
     const monthMap = new Map();
     
     invoices.forEach(invoice => {
@@ -155,23 +143,19 @@ const Dashboard = () => {
       monthData.revenue += invoice.total_amount;
     });
     
-    // Convert map to array and sort by date
     return Array.from(monthMap.values())
       .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
-      .slice(-6); // Get last 6 months
+      .slice(-6);
   }
 
-  // Project status data for pie chart - use real data
   const projectStatusData = [
     { name: 'Active', value: activeProjects.length, color: '#3B82F6' },
     { name: 'Completed', value: completedProjects.length, color: '#10B981' },
     { name: 'On Hold', value: onHoldProjects.length, color: '#F59E0B' },
   ];
 
-  // Time tracking data from timeEntries
   const timeTrackingData = getMonthlyTimeData();
 
-  // Custom color scheme for charts
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
   const isLoading = isLoadingProjects || isLoadingInvoices;
@@ -185,7 +169,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-y-auto scrollbar-none">
       <div>
         <h1 className="text-2xl font-bold text-billflow-gray-900">Dashboard</h1>
         <p className="text-billflow-gray-500 mt-1">
@@ -193,14 +177,13 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* Project Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Projects"
           value={totalProjects}
           icon={FileText}
           variant="primary"
-          trend={8} // Sample trend data for UI display
+          trend={8}
         />
         <StatsCard
           title="Active Projects"
@@ -225,7 +208,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Invoice Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Invoiced"
@@ -257,7 +239,6 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Monthly Revenue Chart */}
         <Card className="p-5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-billflow-gray-900">Monthly Revenue</h2>
@@ -289,7 +270,6 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Project Status Distribution */}
         <Card className="p-5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-billflow-gray-900">Project Status Distribution</h2>
@@ -321,7 +301,6 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Invoices */}
         <Card className="p-5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-billflow-gray-900">Recent Invoices</h2>
@@ -353,7 +332,6 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Time Tracking */}
         <Card className="p-5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-billflow-gray-900">Weekly Time Tracking</h2>
@@ -374,7 +352,6 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Top Clients */}
       <Card className="p-5">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-billflow-gray-900">Top Clients</h2>
@@ -403,7 +380,6 @@ const Dashboard = () => {
         </div>
       </Card>
 
-      {/* Upcoming Invoices */}
       <Card className="p-5">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-billflow-gray-900">Upcoming Invoices</h2>

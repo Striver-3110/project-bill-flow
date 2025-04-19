@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -61,24 +60,20 @@ const ProjectsDashboard = () => {
 
   const monthlyHoursData = getMonthlyTimeData();
 
-  // Calculate department assignment data from real employees assigned to projects
   const teamAssignmentData = React.useMemo(() => {
     const departmentCounts: Record<string, number> = {};
     const departments = new Set<string>();
     
-    // Get all unique departments
     employees?.forEach(emp => {
       if (emp.department) {
         departments.add(emp.department);
       }
     });
     
-    // Initialize counts for each department
     departments.forEach(dept => {
       departmentCounts[dept] = 0;
     });
     
-    // Count assignments by department
     projects?.forEach(project => {
       project.assignments?.forEach(assignment => {
         if (assignment.employee_id && assignment.status === "ACTIVE") {
@@ -90,7 +85,6 @@ const ProjectsDashboard = () => {
       });
     });
     
-    // Convert to chart data format
     const departmentColors: Record<string, string> = {
       "Engineering": "#3B82F6",
       "Design": "#EC4899",
@@ -107,18 +101,15 @@ const ProjectsDashboard = () => {
     }));
   }, [projects, employees]);
 
-  // Calculate top employees based on actual time entries
   const topEmployees = React.useMemo(() => {
     const employeeHours: Record<string, number> = {};
     
-    // Sum hours for each employee
     timeEntries?.forEach(entry => {
       if (entry.employee_id) {
         employeeHours[entry.employee_id] = (employeeHours[entry.employee_id] || 0) + entry.hours;
       }
     });
     
-    // Convert to array and sort
     const sortedEmployees = Object.entries(employeeHours)
       .map(([employeeId, hours]) => {
         const employee = employees?.find(e => e.employee_id === employeeId);
@@ -126,7 +117,6 @@ const ProjectsDashboard = () => {
           id: employeeId,
           name: employee ? `${employee.first_name} ${employee.last_name}` : "Unknown Employee",
           hours,
-          // Calculate utilization as a percentage of 40 hours/week × 4 weeks = 160 hours/month
           utilization: Math.min(Math.round((hours / 160) * 100), 100),
           role: employee?.designation || "Unknown Role"
         };
@@ -168,7 +158,7 @@ const ProjectsDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-y-auto scrollbar-none">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Projects Dashboard</h1>
         <div className="flex items-center gap-2">

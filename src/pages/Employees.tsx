@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -44,7 +43,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Colors for department chart
 const CHART_COLORS = [
   "#10B981", "#6366F1", "#F59E0B", "#EF4444", "#8B5CF6", 
   "#EC4899", "#0EA5E9", "#14B8A6", "#F97316", "#A855F7"
@@ -73,23 +71,18 @@ const Employees = () => {
 
   const filteredEmployees = employees
     ?.filter(employee => 
-      // Apply text search filter
       (employee.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
        employee.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
        employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
        employee.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
        employee.department.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      // Apply department filter if set
       (!departmentFilter || departmentFilter === "all" || employee.department.toLowerCase() === departmentFilter.toLowerCase()) &&
-      // Apply status filter if set
       (!statusFilter || statusFilter === "all" || employee.status === statusFilter)
     );
 
-  // Generate department distribution data from actual employees
   const departmentData = useMemo(() => {
     if (!employees || employees.length === 0) return [];
     
-    // Count employees by department
     const departmentCounts: { [key: string]: number } = {};
     employees.forEach(emp => {
       if (emp.department) {
@@ -97,7 +90,6 @@ const Employees = () => {
       }
     });
     
-    // Convert to chart format
     return Object.entries(departmentCounts).map(([name, value], index) => ({
       name,
       value,
@@ -105,7 +97,6 @@ const Employees = () => {
     }));
   }, [employees]);
 
-  // Compute stats for the dashboard
   const employeeStats = useMemo(() => ({
     totalEmployees: employees?.length || 0,
     activeEmployees: employees?.filter(e => e.status === 'active').length || 0,
@@ -113,27 +104,24 @@ const Employees = () => {
       ? employees.reduce((sum, e) => sum + e.cost_rate, 0) / employees.length 
       : 0,
     totalDepartments: departmentData.length,
-    // In a real app these would come from time entries or projects
     totalHours: 1640,
     activeAssignments: 38,
     totalProjects: 12,
   }), [employees, departmentData.length]);
 
-  // Generate cost rate data from actual employees
   const costRateData = useMemo(() => {
     if (!employees || employees.length === 0) return [];
     
     return employees
-      .slice(0, 8) // Take top 8 for readability
+      .slice(0, 8)
       .map(emp => ({
         name: `${emp.first_name.charAt(0)}. ${emp.last_name}`,
         rate: emp.cost_rate
       }))
-      .sort((a, b) => b.rate - a.rate); // Sort by cost rate descending
+      .sort((a, b) => b.rate - a.rate);
   }, [employees]);
 
   const handleExportEmployees = () => {
-    // Create CSV content
     const headers = ["First Name", "Last Name", "Email", "Phone", "Department", "Designation", "Status", "Cost Rate"];
     const csvContent = [
       headers.join(","),
@@ -149,7 +137,6 @@ const Employees = () => {
       ].join(","))
     ].join("\n");
 
-    // Create and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -162,7 +149,7 @@ const Employees = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-y-auto scrollbar-none">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Employee Management</h1>
         <div className="flex gap-2">

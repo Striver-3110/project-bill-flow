@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Search, 
@@ -19,7 +18,7 @@ import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
 import { Invoice } from "@/types";
 
-export default function Invoices() {
+const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { invoices, isLoading, error, deleteInvoice } = useInvoices();
 
@@ -35,7 +34,6 @@ export default function Invoices() {
     overdue: filteredInvoices.filter(inv => inv.status === 'overdue').length,
   };
 
-  // Helper function to ensure status is of the correct type
   const getValidStatus = (status: string): "paid" | "sent" | "overdue" | "draft" | "active" | "inactive" | "completed" | "on-hold" => {
     switch(status) {
       case 'paid':
@@ -47,7 +45,6 @@ export default function Invoices() {
       case 'draft':
         return 'draft';
       default:
-        // Fallback to draft if unknown status
         return 'draft';
     }
   };
@@ -61,7 +58,7 @@ export default function Invoices() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-y-auto scrollbar-none">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-billflow-gray-900">Invoices</h1>
@@ -195,4 +192,6 @@ export default function Invoices() {
       </div>
     </div>
   );
-}
+};
+
+export default Invoices;
