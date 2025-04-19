@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
 import { toast } from "sonner";
-import { Download, FileText, FilePdf, FileSpreadsheet } from "lucide-react";
+import { Download, FileText, FileSpreadsheet } from "lucide-react";
 import { saveAs } from "file-saver";
 
 interface DownloadInvoiceDialogProps {
@@ -74,7 +74,7 @@ export function DownloadInvoiceDialog({ invoice, trigger }: DownloadInvoiceDialo
         
         <div className="grid grid-cols-1 gap-4 py-4">
           <Button onClick={downloadAsPDF} className="flex items-center justify-start" variant="outline">
-            <FilePdf className="mr-2" size={20} />
+            <FileText className="mr-2" size={20} />
             Download as PDF
           </Button>
           
