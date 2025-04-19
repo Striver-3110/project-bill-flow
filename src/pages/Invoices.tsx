@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   Search, 
@@ -48,6 +49,29 @@ const Invoices = () => {
       default:
         return 'draft';
     }
+  };
+  
+  // Convert the database invoice format to the Invoice type expected by action functions
+  const mapToInvoiceType = (dbInvoice: any): Invoice => {
+    return {
+      id: dbInvoice.invoice_id,
+      invoice_id: dbInvoice.invoice_id,
+      client_id: dbInvoice.client_id,
+      invoice_number: dbInvoice.invoice_number,
+      invoice_date: dbInvoice.invoice_date,
+      due_date: dbInvoice.due_date,
+      status: dbInvoice.status,
+      items: [], // Default empty array as it's required by type
+      total_amount: dbInvoice.total_amount,
+      currency: dbInvoice.currency,
+      client: dbInvoice.client, // Preserve the client object
+      notes: dbInvoice.notes,
+      created_at: dbInvoice.created_at,
+      updated_at: dbInvoice.updated_at,
+      payment_date: dbInvoice.payment_date,
+      billing_period_start: dbInvoice.billing_period_start,
+      billing_period_end: dbInvoice.billing_period_end,
+    };
   };
 
   if (error) {
@@ -129,88 +153,91 @@ const Invoices = () => {
                   </td>
                 </tr>
               ) : (
-                filteredInvoices.map((invoice) => (
-                  <tr key={invoice.invoice_id} className="hover:bg-billflow-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-billflow-gray-900">
-                        {invoice.invoice_number}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-billflow-gray-900">
-                        {invoice.client.client_name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-billflow-gray-900">
-                        {formatDate(invoice.invoice_date)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-billflow-gray-900">
-                        {formatDate(invoice.due_date)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-billflow-gray-900">
-                        {formatCurrency(invoice.total_amount, invoice.currency)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={getValidStatus(invoice.status)} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-billflow-blue-600 mr-1"
-                        onClick={() => viewInvoice(invoice)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-billflow-blue-600 mr-1"
-                        onClick={() => viewInvoice(invoice)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-billflow-gray-600 mr-1"
-                        onClick={() => mailInvoice(invoice)}
-                      >
-                        <Mail className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-billflow-gray-600 mr-1"
-                        onClick={() => downloadInvoice(invoice)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-billflow-gray-600 mr-1"
-                        onClick={() => printInvoice(invoice)}
-                      >
-                        <Printer className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-red-600"
-                        onClick={() => deleteInvoice(invoice.invoice_id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
+                filteredInvoices.map((dbInvoice) => {
+                  const invoice = mapToInvoiceType(dbInvoice);
+                  return (
+                    <tr key={invoice.invoice_id} className="hover:bg-billflow-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-billflow-gray-900">
+                          {invoice.invoice_number}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-billflow-gray-900">
+                          {invoice.client?.client_name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-billflow-gray-900">
+                          {formatDate(invoice.invoice_date)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-billflow-gray-900">
+                          {formatDate(invoice.due_date)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-billflow-gray-900">
+                          {formatCurrency(invoice.total_amount, invoice.currency)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <StatusBadge status={getValidStatus(invoice.status)} />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-billflow-blue-600 mr-1"
+                          onClick={() => viewInvoice(invoice)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-billflow-blue-600 mr-1"
+                          onClick={() => viewInvoice(invoice)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-billflow-gray-600 mr-1"
+                          onClick={() => mailInvoice(invoice)}
+                        >
+                          <Mail className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-billflow-gray-600 mr-1"
+                          onClick={() => downloadInvoice(invoice)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-billflow-gray-600 mr-1"
+                          onClick={() => printInvoice(invoice)}
+                        >
+                          <Printer className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600"
+                          onClick={() => deleteInvoice(invoice.invoice_id || invoice.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
