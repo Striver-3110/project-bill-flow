@@ -68,7 +68,7 @@ export type ClientProjectData = {
 export function useInvoices() {
   const queryClient = useQueryClient();
 
-  const { data: invoices, isLoading, error } = useQuery({
+  const { data: invoices, isLoading, error, refetch } = useQuery({
     queryKey: ['invoices'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -302,6 +302,7 @@ export function useInvoices() {
     deleteInvoice: deleteInvoiceMutation.mutate,
     createInvoice: createInvoiceMutation.mutate,
     isCreating: createInvoiceMutation.isPending,
-    getClientProjectDataForInvoice
+    getClientProjectDataForInvoice,
+    refetch  // Add the refetch function to the return object
   };
 }
