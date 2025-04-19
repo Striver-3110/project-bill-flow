@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import { ProjectFinancials } from "@/components/projects/ProjectFinancials";
 import { TimeEntriesTable } from "@/components/projects/TimeEntriesTable";
 import { useTimeEntryMutations } from "@/hooks/use-time-entry-mutations";
 import { useEmployees } from "@/hooks/use-employees";
-import { useQueryClient } from "@tanstack/react-query";
+import type { Project } from "@/types";
 
 const ProjectsDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");

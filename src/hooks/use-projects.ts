@@ -1,11 +1,13 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectMutations } from "./use-project-mutations";
 import { useTimeEntryMutations } from "./use-time-entry-mutations";
 import { getMonthlyTimeData } from "@/utils/projectCalculations";
 
 export const useProjects = () => {
+  const queryClient = useQueryClient();
+  
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -72,5 +74,6 @@ export const useProjects = () => {
     deleteProject,
     addTimeEntry,
     getMonthlyTimeData: () => getMonthlyTimeData(timeEntries || []),
+    queryClient,
   };
 };

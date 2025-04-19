@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,8 +26,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ProjectAssignmentDialog } from "./ProjectAssignmentDialog";
 import { EditProjectDialog } from "./EditProjectDialog";
+import type { Project } from "@/types";
 
-interface Project {
+// Define a local Project type for backward compatibility if needed
+interface ProjectItem {
   project_id: string;
   project_name: string;
   client?: { client_name: string };
@@ -43,7 +46,7 @@ export const ProjectList = ({
   handleDeleteProject,
   handleProjectUpdated
 }: { 
-  projects: Project[];
+  projects: ProjectItem[];
   projectStats: any[];
   handleDeleteProject: (id: string) => Promise<void>;
   handleProjectUpdated: (project: Project) => void;
@@ -111,7 +114,7 @@ export const ProjectList = ({
                     </Button>
                   </Link>
                   <EditProjectDialog
-                    project={project}
+                    project={project as unknown as Project}
                     onProjectUpdated={handleProjectUpdated}
                     trigger={
                       <Button
