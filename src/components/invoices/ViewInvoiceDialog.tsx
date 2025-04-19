@@ -70,13 +70,6 @@ export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) 
               <p className="font-semibold">{formatCurrency(invoice.total_amount, invoice.currency)}</p>
             </div>
           </div>
-
-          {invoice.notes && (
-            <div>
-              <h3 className="font-medium">Notes</h3>
-              <p>{invoice.notes}</p>
-            </div>
-          )}
         </div>
         
         <div className="flex justify-end">

@@ -31,7 +31,6 @@ const invoiceSchema = z.object({
   status: z.enum(["draft", "pending", "paid", "overdue", "sent"]),
   total_amount: z.number().min(0, "Amount must be greater than 0"),
   currency: z.string().min(1, "Currency is required"),
-  notes: z.string().optional(),
 });
 
 interface EditInvoiceDialogProps {
@@ -52,7 +51,6 @@ export function EditInvoiceDialog({ invoice, onInvoiceUpdated, trigger }: EditIn
       status: invoice.status,
       total_amount: invoice.total_amount,
       currency: invoice.currency,
-      notes: invoice.notes || "",
     },
   });
 
@@ -171,19 +169,6 @@ export function EditInvoiceDialog({ invoice, onInvoiceUpdated, trigger }: EditIn
                       <option value="paid">Paid</option>
                       <option value="overdue">Overdue</option>
                     </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
