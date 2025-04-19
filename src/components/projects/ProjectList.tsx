@@ -1,7 +1,8 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -90,6 +91,15 @@ export const ProjectList = ({
                   <Button
                     variant="outline"
                     size="icon"
+                    as={Link}
+                    to={`/projects/${project.project_id}`}
+                    title="View Project Details"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => toast.info("Edit functionality coming soon!")}
                   >
                     <Pencil className="h-4 w-4" />
@@ -130,4 +140,4 @@ export const ProjectList = ({
       </TableBody>
     </Table>
   );
-};
+}

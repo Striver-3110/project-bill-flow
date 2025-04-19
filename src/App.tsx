@@ -1,38 +1,48 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
+
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
 import Clients from "./pages/Clients";
 import Invoices from "./pages/Invoices";
-import NotFound from "./pages/NotFound";
-import Projects from "./pages/Projects";
 import Employees from "./pages/Employees";
 import Settings from "./pages/Settings";
+import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+import "./App.css";
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/clients" element={<Layout><Clients /></Layout>} />
-          <Route path="/invoices" element={<Layout><Invoices /></Layout>} />
-          <Route path="/projects" element={<Layout><Projects /></Layout>} />
-          <Route path="/employees" element={<Layout><Employees /></Layout>} />
-          <Route path="/settings" element={<Layout><Settings /></Layout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/projects/*" element={<Projects />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/employees" element={<Employees />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
+      </Router>
+      <Toaster position="top-right" richColors closeButton />
+    </QueryClientProvider>
+  );
+}
 
 export default App;

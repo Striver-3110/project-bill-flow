@@ -1,4 +1,6 @@
+
 import React, { useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -7,6 +9,7 @@ import { useProjects } from "@/hooks/use-projects";
 import { toast } from "sonner";
 import { TimeEntryDialog } from "@/components/ui/timeEntry";
 import { ProjectList } from "@/components/projects/ProjectList";
+import { ProjectDetails } from "@/components/projects/ProjectDetails";
 import { ProjectAnalytics } from "@/components/projects/ProjectAnalytics";
 import { TeamUtilization } from "@/components/projects/TeamUtilization";
 import { ProjectFinancials } from "@/components/projects/ProjectFinancials";
@@ -14,7 +17,7 @@ import { TimeEntriesTable } from "@/components/projects/TimeEntriesTable";
 import { useTimeEntryMutations } from "@/hooks/use-time-entry-mutations";
 import { useEmployees } from "@/hooks/use-employees";
 
-const Projects = () => {
+const ProjectsDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingTimeEntry, setEditingTimeEntry] = useState(null);
   const { 
@@ -58,19 +61,81 @@ const Projects = () => {
 
   const monthlyHoursData = getMonthlyTimeData();
 
-  const teamAssignmentData = [
-    { name: "Engineering", value: 18, color: "#3B82F6" },
-    { name: "Design", value: 12, color: "#EC4899" },
-    { name: "QA", value: 8, color: "#10B981" },
-    { name: "Management", value: 7, color: "#F59E0B" },
-  ];
+  // Calculate department assignment data from real employees assigned to projects
+  const teamAssignmentData = React.useMemo(() => {
+    const departmentCounts: Record<string, number> = {};
+    const departments = new Set<string>();
+    
+    // Get all unique departments
+    employees?.forEach(emp => {
+      if (emp.department) {
+        departments.add(emp.department);
+      }
+    });
+    
+    // Initialize counts for each department
+    departments.forEach(dept => {
+      departmentCounts[dept] = 0;
+    });
+    
+    // Count assignments by department
+    projects?.forEach(project => {
+      project.assignments?.forEach(assignment => {
+        if (assignment.employee_id && assignment.status === "ACTIVE") {
+          const employee = employees?.find(e => e.employee_id === assignment.employee_id);
+          if (employee?.department) {
+            departmentCounts[employee.department] = (departmentCounts[employee.department] || 0) + 1;
+          }
+        }
+      });
+    });
+    
+    // Convert to chart data format
+    const departmentColors: Record<string, string> = {
+      "Engineering": "#3B82F6",
+      "Design": "#EC4899",
+      "Development": "#10B981",
+      "QA": "#F59E0B",
+      "Management": "#6366F1",
+      "Business": "#8B5CF6",
+    };
+    
+    return Object.entries(departmentCounts).map(([name, value]) => ({
+      name,
+      value,
+      color: departmentColors[name] || "#64748B"
+    }));
+  }, [projects, employees]);
 
-  const topEmployees = [
-    { name: "David Anderson", hours: 168, utilization: 96, role: "Senior Developer" },
-    { name: "Lisa Martinez", hours: 160, utilization: 92, role: "Project Manager" },
-    { name: "James Wilson", hours: 155, utilization: 88, role: "UX Designer" },
-    { name: "Emily Taylor", hours: 150, utilization: 86, role: "Business Analyst" },
-  ];
+  // Calculate top employees based on actual time entries
+  const topEmployees = React.useMemo(() => {
+    const employeeHours: Record<string, number> = {};
+    
+    // Sum hours for each employee
+    timeEntries?.forEach(entry => {
+      if (entry.employee_id) {
+        employeeHours[entry.employee_id] = (employeeHours[entry.employee_id] || 0) + entry.hours;
+      }
+    });
+    
+    // Convert to array and sort
+    const sortedEmployees = Object.entries(employeeHours)
+      .map(([employeeId, hours]) => {
+        const employee = employees?.find(e => e.employee_id === employeeId);
+        return {
+          id: employeeId,
+          name: employee ? `${employee.first_name} ${employee.last_name}` : "Unknown Employee",
+          hours,
+          // Calculate utilization as a percentage of 40 hours/week × 4 weeks = 160 hours/month
+          utilization: Math.min(Math.round((hours / 160) * 100), 100),
+          role: employee?.designation || "Unknown Role"
+        };
+      })
+      .sort((a, b) => b.hours - a.hours)
+      .slice(0, 5);
+      
+    return sortedEmployees;
+  }, [timeEntries, employees]);
 
   const handleDeleteProject = async (projectId: string) => {
     try {
@@ -191,6 +256,15 @@ const Projects = () => {
         </TabsContent>
       </Tabs>
     </div>
+  );
+};
+
+const Projects = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<ProjectsDashboard />} />
+      <Route path="/:projectId" element={<ProjectDetails />} />
+    </Routes>
   );
 };
 
