@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, toggleSidebar }) =>
       )}
       
       <div className="px-6 py-6 flex items-center border-b border-billflow-gray-200">
-        <h1 className="text-2xl font-bold text-billflow-blue-600">BillFlow</h1>
+        <h1 className="text-2xl font-bold text-billflow-blue-600">InvoiceGenius</h1>
       </div>
       
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
