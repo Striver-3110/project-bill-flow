@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Search, 
@@ -19,10 +18,11 @@ import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
 import { viewInvoice, mailInvoice, downloadInvoice, printInvoice } from "@/utils/invoiceActions";
 import { Invoice } from "@/types";
+import { EditInvoiceDialog } from "@/components/invoices/EditInvoiceDialog";
 
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { invoices, isLoading, error, deleteInvoice } = useInvoices();
+  const { invoices, isLoading, error, deleteInvoice, refetch } = useInvoices();
 
   const filteredInvoices = invoices?.filter(invoice => 
     invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,7 +51,6 @@ const Invoices = () => {
     }
   };
   
-  // Convert the database invoice format to the Invoice type expected by action functions
   const mapToInvoiceType = (dbInvoice: any): Invoice => {
     return {
       id: dbInvoice.invoice_id,
@@ -61,10 +60,10 @@ const Invoices = () => {
       invoice_date: dbInvoice.invoice_date,
       due_date: dbInvoice.due_date,
       status: dbInvoice.status,
-      items: [], // Default empty array as it's required by type
+      items: [],
       total_amount: dbInvoice.total_amount,
       currency: dbInvoice.currency,
-      client: dbInvoice.client, // Preserve the client object
+      client: dbInvoice.client,
       notes: dbInvoice.notes,
       created_at: dbInvoice.created_at,
       updated_at: dbInvoice.updated_at,
@@ -194,14 +193,21 @@ const Invoices = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-billflow-blue-600 mr-1"
-                          onClick={() => viewInvoice(invoice)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        
+                        <EditInvoiceDialog 
+                          invoice={invoice} 
+                          onInvoiceUpdated={refetch}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-blue-600 mr-1"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
                         <Button 
                           variant="ghost" 
                           size="sm" 
