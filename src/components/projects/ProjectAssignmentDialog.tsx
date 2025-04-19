@@ -275,30 +275,4 @@ export function ProjectAssignmentDialog({ projectId, projectName, children }: Pr
       </DialogContent>
     </Dialog>
   );
-  
-  function onSubmit(data: Omit<ProjectAssignment, "project_id" | "status">) {
-    try {
-      if (!data.employee_id) {
-        return;
-      }
-      
-      setIsSubmitting(true);
-      
-      const assignmentData: ProjectAssignment = {
-        ...data,
-        project_id: projectId,
-        status: 'ACTIVE',
-      };
-      
-      addAssignment.mutateAsync(assignmentData).then(() => {
-        setOpen(false);
-        form.reset();
-      }).finally(() => {
-        setIsSubmitting(false);
-      });
-    } catch (error) {
-      console.error("Assignment error:", error);
-      setIsSubmitting(false);
-    }
-  }
 }

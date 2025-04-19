@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, UserMinus } from "lucide-react";
+import { Calendar, UserMinus, UserPlus } from "lucide-react";
 import { ProjectAssignmentDialog } from "./ProjectAssignmentDialog";
 import { useProjectAssignments } from "@/hooks/use-project-assignments";
 import { format } from "date-fns";
@@ -64,7 +64,12 @@ export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
             Team members assigned to this project
           </CardDescription>
         </div>
-        <ProjectAssignmentDialog projectId={projectId} projectName={projectName} />
+        <ProjectAssignmentDialog projectId={projectId} projectName={projectName}>
+          <Button variant="outline" size="sm">
+            <UserPlus className="h-4 w-4 mr-2" />
+            Assign Employee
+          </Button>
+        </ProjectAssignmentDialog>
       </CardHeader>
       <CardContent>
         {activeAssignments.length === 0 ? (
