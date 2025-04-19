@@ -2,6 +2,11 @@
 import { Invoice } from "@/types";
 import { saveAs } from "file-saver";
 import { toast } from "sonner";
+import emailjs from '@emailjs/browser';
+
+// Initialize EmailJS with your public key
+// Replace this with your actual EmailJS public key
+emailjs.init("YOUR_PUBLIC_KEY");
 
 // These functions are kept for backward compatibility
 // but they're not used in the new dialog-based approach
@@ -13,33 +18,28 @@ export const viewInvoice = (invoice: Invoice) => {
 
 export const mailInvoice = async (invoice: Invoice, recipientEmail: string, subject: string, message: string) => {
   try {
-    // Make an actual API call to send the email
-    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        service_id: 'service_default',
-        template_id: 'template_invoice',
-        user_id: 'user_public_key',
-        template_params: {
-          to_email: recipientEmail,
-          from_name: 'BillFlow',
-          subject: subject,
-          message: message,
-          invoice_number: invoice.invoice_number,
-          client_name: invoice.client?.client_name || 'client',
-          invoice_date: invoice.invoice_date,
-          due_date: invoice.due_date,
-          amount: invoice.total_amount,
-          currency: invoice.currency
-        }
-      }),
-    });
+    // Prepare the template parameters
+    const templateParams = {
+      to_email: recipientEmail,
+      from_name: 'BillFlow',
+      subject: subject,
+      message: message,
+      invoice_number: invoice.invoice_number,
+      client_name: invoice.client?.client_name || 'client',
+      invoice_date: invoice.invoice_date,
+      due_date: invoice.due_date,
+      amount: invoice.total_amount,
+      currency: invoice.currency
+    };
 
-    if (response.ok) {
-      const clientName = invoice.client?.client_name || 'client';
+    // Send the email using EmailJS
+    const response = await emailjs.send(
+      'service_id', // Replace with your EmailJS service ID
+      'template_id', // Replace with your EmailJS template ID
+      templateParams
+    );
+
+    if (response.status === 200) {
       toast.success(`Invoice ${invoice.invoice_number} sent to ${recipientEmail}`);
       return true;
     } else {

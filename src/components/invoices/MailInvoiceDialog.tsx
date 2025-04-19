@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { mailInvoice } from "@/utils/invoiceActions";
+import { AlertCircle } from "lucide-react";
 
 interface MailInvoiceDialogProps {
   invoice: Invoice;
@@ -79,6 +81,9 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Send Invoice {invoice.invoice_number}</DialogTitle>
+          <DialogDescription>
+            Fill out the form below to email this invoice to your client.
+          </DialogDescription>
         </DialogHeader>
         
         <Form {...form}>
@@ -127,6 +132,19 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
                 </FormItem>
               )}
             />
+            
+            <div className="mt-2 rounded-md bg-yellow-50 p-3">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    You need to configure EmailJS with your own service ID, template ID, and public key in the invoiceActions.ts file.
+                  </p>
+                </div>
+              </div>
+            </div>
             
             <div className="flex justify-end space-x-2 pt-2">
               <DialogClose asChild>
