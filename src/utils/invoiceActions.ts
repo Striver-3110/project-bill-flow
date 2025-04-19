@@ -6,7 +6,7 @@ import emailjs from '@emailjs/browser';
 
 // Initialize EmailJS with your public key
 // Replace this with your actual EmailJS public key
-emailjs.init("YOUR_PUBLIC_KEY");
+emailjs.init("XZjPDxTgi90v1yY24");
 
 // These functions are kept for backward compatibility
 // but they're not used in the new dialog-based approach
@@ -34,8 +34,8 @@ export const mailInvoice = async (invoice: Invoice, recipientEmail: string, subj
 
     // Send the email using EmailJS
     const response = await emailjs.send(
-      'service_id', // Replace with your EmailJS service ID
-      'template_id', // Replace with your EmailJS template ID
+      'service_l7nutaw', // Replace with your EmailJS service ID
+      'template_86qatd1', // Replace with your EmailJS template ID
       templateParams
     );
 
