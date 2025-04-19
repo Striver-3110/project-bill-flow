@@ -1,10 +1,24 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const useTimeEntryMutations = () => {
   const queryClient = useQueryClient();
+
+  const checkForDuplicateEntry = async (employeeId: string, date: string) => {
+    const { data, error } = await supabase
+      .from("time_entries")
+      .select("time_entry_id")
+      .eq("employee_id", employeeId)
+      .eq("date", date);
+
+    if (error) {
+      console.error("Error checking for duplicate entries:", error);
+      throw error;
+    }
+
+    return data && data.length > 0;
+  };
 
   const addTimeEntry = useMutation({
     mutationFn: async (timeEntry: {
@@ -15,6 +29,15 @@ export const useTimeEntryMutations = () => {
       description?: string;
       billable?: boolean;
     }) => {
+      const hasDuplicate = await checkForDuplicateEntry(
+        timeEntry.employee_id,
+        timeEntry.date
+      );
+
+      if (hasDuplicate) {
+        throw new Error("A time entry already exists for this employee on the selected date");
+      }
+
       const { data, error } = await supabase
         .from("time_entries")
         .insert(timeEntry)
@@ -30,6 +53,10 @@ export const useTimeEntryMutations = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["time_entries"] });
       queryClient.invalidateQueries({ queryKey: ["project_statistics"] });
+      toast.success("Time entry added successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to add time entry");
     },
   });
 

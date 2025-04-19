@@ -53,9 +53,10 @@ interface FormData {
 export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { projects, addTimeEntry } = useProjects();
+  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
+  const { projects } = useProjects();
   const { employees } = useEmployees();
-  const { updateTimeEntry } = useTimeEntryMutations();
+  const { updateTimeEntry, addTimeEntry } = useTimeEntryMutations();
   
   const form = useForm<FormData>({
     defaultValues: {
@@ -67,6 +68,24 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
       billable: true,
     }
   });
+
+  useEffect(() => {
+    const selectedProjectId = form.watch("project_id");
+    if (selectedProjectId && projects) {
+      const project = projects.find(p => p.project_id === selectedProjectId);
+      if (project && project.assignments) {
+        const assignedEmployeeIds = project.assignments.map(a => a.employee_id);
+        const projectEmployees = employees?.filter(employee => 
+          assignedEmployeeIds.includes(employee.employee_id)
+        ) || [];
+        setFilteredEmployees(projectEmployees);
+      } else {
+        setFilteredEmployees([]);
+      }
+    } else {
+      setFilteredEmployees([]);
+    }
+  }, [form.watch("project_id"), projects, employees]);
 
   useEffect(() => {
     if (editEntry) {
@@ -127,9 +146,9 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
       setOpen(false);
       form.reset();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Time entry error:", error);
-      toast.error(editEntry ? "Failed to update time entry" : "Failed to add time entry");
+      // Error message is now handled by the mutation's onError callback
     } finally {
       setIsSubmitting(false);
     }
@@ -144,7 +163,7 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Time Entry</DialogTitle>
+          <DialogTitle>{editEntry ? "Edit Time Entry" : "Add Time Entry"}</DialogTitle>
           <DialogDescription>
             Log your time spent on a project
           </DialogDescription>
@@ -158,7 +177,10 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
                 <FormItem>
                   <FormLabel>Project</FormLabel>
                   <Select 
-                    onValueChange={field.onChange} 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("employee_id", "");
+                    }} 
                     value={field.value}
                   >
                     <FormControl>
@@ -195,7 +217,7 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {employees?.map((employee) => (
+                      {filteredEmployees.map((employee) => (
                         <SelectItem key={employee.employee_id} value={employee.employee_id}>
                           {employee.first_name} {employee.last_name}
                         </SelectItem>
