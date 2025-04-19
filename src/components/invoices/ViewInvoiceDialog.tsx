@@ -21,11 +21,6 @@ interface ViewInvoiceDialogProps {
 export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) {
   const [open, setOpen] = React.useState(false);
 
-  // Prevent default behavior that could cause dialog to close unexpectedly
-  const handleDialogInteraction = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild onClick={(e) => {
@@ -34,7 +29,7 @@ export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) 
       }}>
         {trigger || <Button variant="ghost" size="sm">View</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px] z-50" onClick={handleDialogInteraction}>
+      <DialogContent className="sm:max-w-[625px] z-[100]" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Invoice {invoice.invoice_number}</DialogTitle>
           <DialogDescription>

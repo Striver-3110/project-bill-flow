@@ -73,11 +73,6 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
     }
   };
 
-  // Prevent default behavior that could cause dialog to close unexpectedly
-  const handleDialogInteraction = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild onClick={(e) => {
@@ -86,7 +81,7 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
       }}>
         {trigger || <Button variant="ghost" size="sm">Mail</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] z-50" onClick={handleDialogInteraction}>
+      <DialogContent className="sm:max-w-[525px] z-[100]" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Send Invoice {invoice.invoice_number}</DialogTitle>
           <DialogDescription>
