@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -39,6 +39,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useTimeEntryMutations } from "@/hooks/use-time-entry-mutations";
 
 interface FormData {
   project_id: string;
@@ -49,11 +50,12 @@ interface FormData {
   billable: boolean;
 }
 
-export function TimeEntryDialog() {
+export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { projects, addTimeEntry } = useProjects();
   const { employees } = useEmployees();
+  const { updateTimeEntry } = useTimeEntryMutations();
   
   const form = useForm<FormData>({
     defaultValues: {
@@ -65,6 +67,20 @@ export function TimeEntryDialog() {
       billable: true,
     }
   });
+
+  useEffect(() => {
+    if (editEntry) {
+      setOpen(true);
+      form.reset({
+        project_id: editEntry.project_id,
+        employee_id: editEntry.employee_id,
+        date: new Date(editEntry.date),
+        hours: editEntry.hours,
+        description: editEntry.description || "",
+        billable: editEntry.billable,
+      });
+    }
+  }, [editEntry, form]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -89,21 +105,31 @@ export function TimeEntryDialog() {
       }
 
       setIsSubmitting(true);
-      await addTimeEntry.mutateAsync({
+
+      const timeEntryData = {
         project_id: data.project_id,
         employee_id: data.employee_id,
         date: data.date.toISOString().split('T')[0],
         hours: data.hours,
         description: data.description,
         billable: data.billable,
-      });
+      };
+
+      if (editEntry) {
+        await updateTimeEntry.mutateAsync({
+          id: editEntry.time_entry_id,
+          data: timeEntryData,
+        });
+      } else {
+        await addTimeEntry.mutateAsync(timeEntryData);
+      }
       
-      toast.success("Time entry added successfully");
       setOpen(false);
       form.reset();
+      onClose();
     } catch (error) {
       console.error("Time entry error:", error);
-      toast.error("Failed to add time entry");
+      toast.error(editEntry ? "Failed to update time entry" : "Failed to add time entry");
     } finally {
       setIsSubmitting(false);
     }
@@ -306,7 +332,6 @@ export function TimeEntryDialog() {
   );
 }
 
-// This component needs to import FormDescription
 function FormDescription(props: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p

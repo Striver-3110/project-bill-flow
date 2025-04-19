@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,9 +10,13 @@ import { ProjectList } from "@/components/projects/ProjectList";
 import { ProjectAnalytics } from "@/components/projects/ProjectAnalytics";
 import { TeamUtilization } from "@/components/projects/TeamUtilization";
 import { ProjectFinancials } from "@/components/projects/ProjectFinancials";
+import { TimeEntriesTable } from "@/components/projects/TimeEntriesTable";
+import { useTimeEntryMutations } from "@/hooks/use-time-entry-mutations";
+import { useEmployees } from "@/hooks/use-employees";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingTimeEntry, setEditingTimeEntry] = useState(null);
   const { 
     projects, 
     projectStats, 
@@ -22,6 +25,8 @@ const Projects = () => {
     deleteProject,
     getMonthlyTimeData
   } = useProjects();
+  const { deleteTimeEntry } = useTimeEntryMutations();
+  const { employees } = useEmployees();
   
   const filteredProjects = projects?.filter(
     project => 
@@ -29,7 +34,6 @@ const Projects = () => {
       (project.client?.client_name && project.client.client_name.toLowerCase().includes(searchTerm.toLowerCase()))
   ) ?? [];
 
-  // Project status counts for analytics
   const activeProjects = projects?.filter(p => p.status === 'ACTIVE') ?? [];
   const completedProjects = projects?.filter(p => p.status === 'COMPLETED') ?? [];
   const onHoldProjects = projects?.filter(p => p.status === 'ON_HOLD') ?? [];
@@ -78,6 +82,18 @@ const Projects = () => {
     }
   };
 
+  const handleDeleteTimeEntry = async (timeEntryId: string) => {
+    try {
+      await deleteTimeEntry.mutateAsync(timeEntryId);
+    } catch (error) {
+      console.error("Delete time entry error:", error);
+    }
+  };
+
+  const handleEditTimeEntry = (timeEntry: any) => {
+    setEditingTimeEntry(timeEntry);
+  };
+
   if (isLoadingProjects) {
     return (
       <div className="flex items-center justify-center h-[70vh]">
@@ -97,7 +113,10 @@ const Projects = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-[250px]"
           />
-          <TimeEntryDialog />
+          <TimeEntryDialog 
+            editEntry={editingTimeEntry} 
+            onClose={() => setEditingTimeEntry(null)} 
+          />
           <NewProjectDialog />
         </div>
       </div>
@@ -105,6 +124,7 @@ const Projects = () => {
       <Tabs defaultValue="projects" className="space-y-4">
         <TabsList>
           <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="time-entries">Time Entries</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="team">Team Utilization</TabsTrigger>
           <TabsTrigger value="financials">Financial</TabsTrigger>
@@ -123,6 +143,26 @@ const Projects = () => {
                 projects={filteredProjects}
                 projectStats={projectStats}
                 handleDeleteProject={handleDeleteProject}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="time-entries">
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Entries</CardTitle>
+              <CardDescription>
+                View and manage all time entries
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TimeEntriesTable
+                timeEntries={timeEntries || []}
+                projects={projects || []}
+                employees={employees || []}
+                onDelete={handleDeleteTimeEntry}
+                onEdit={handleEditTimeEntry}
               />
             </CardContent>
           </Card>
