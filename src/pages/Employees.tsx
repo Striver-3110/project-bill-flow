@@ -42,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useProjects } from "@/hooks/use-projects";
 
 const CHART_COLORS = [
   "#10B981", "#6366F1", "#F59E0B", "#EF4444", "#8B5CF6", 
@@ -63,6 +64,7 @@ const Employees = () => {
     isUpdating, 
     isDeleting 
   } = useEmployees();
+  const { projects } = useProjects();
 
   const handleCreateEmployee = (data: CreateEmployeeInput) => {
     createEmployee(data);
@@ -107,7 +109,14 @@ const Employees = () => {
     totalHours: 1640,
     activeAssignments: 38,
     totalProjects: 12,
-  }), [employees, departmentData.length]);
+    assignedEmployees: employees?.filter(emp => 
+      projects?.some(project => 
+        project.assignments?.some(assignment => 
+          assignment.employee_id === emp.employee_id && assignment.status === 'ACTIVE'
+        )
+      )
+    ).length || 0,
+  }), [employees, departmentData.length, projects]);
 
   const costRateData = useMemo(() => {
     if (!employees || employees.length === 0) return [];
@@ -188,6 +197,13 @@ const Employees = () => {
           icon={UserCheck}
           description="Currently active"
           variant="success"
+        />
+        <StatsCard
+          title="Project Assignments"
+          value={`${employeeStats.assignedEmployees} / ${employeeStats.totalEmployees}`}
+          icon={Briefcase}
+          description="Employees assigned to projects"
+          variant="primary"
         />
         <StatsCard
           title="Monthly Hours"
