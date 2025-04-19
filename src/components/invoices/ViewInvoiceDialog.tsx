@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
@@ -20,14 +21,22 @@ interface ViewInvoiceDialogProps {
 export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) {
   const [open, setOpen] = React.useState(false);
 
+  // Prevent default behavior that could cause dialog to close unexpectedly
+  const handleDialogInteraction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
         {trigger || <Button variant="ghost" size="sm">View</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-[625px]" onClick={handleDialogInteraction}>
         <DialogHeader>
           <DialogTitle>Invoice {invoice.invoice_number}</DialogTitle>
+          <DialogDescription>
+            View the details of this invoice
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
@@ -74,7 +83,7 @@ export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) 
         
         <div className="flex justify-end">
           <DialogClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline" onClick={(e) => e.stopPropagation()}>Close</Button>
           </DialogClose>
         </div>
       </DialogContent>
