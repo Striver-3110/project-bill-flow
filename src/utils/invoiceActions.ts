@@ -11,14 +11,44 @@ export const viewInvoice = (invoice: Invoice) => {
   window.open(`/invoices/${invoice.invoice_id || invoice.id}`, '_blank');
 };
 
-export const mailInvoice = async (invoice: Invoice) => {
+export const mailInvoice = async (invoice: Invoice, recipientEmail: string, subject: string, message: string) => {
   try {
-    // In a real app, you would call your email service here
-    // For now, we'll just show a success message
-    const clientName = invoice.client?.client_name || 'client';
-    toast.success(`Invoice ${invoice.invoice_number} sent to ${clientName}`);
+    // Make an actual API call to send the email
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        service_id: 'service_default',
+        template_id: 'template_invoice',
+        user_id: 'user_public_key',
+        template_params: {
+          to_email: recipientEmail,
+          from_name: 'BillFlow',
+          subject: subject,
+          message: message,
+          invoice_number: invoice.invoice_number,
+          client_name: invoice.client?.client_name || 'client',
+          invoice_date: invoice.invoice_date,
+          due_date: invoice.due_date,
+          amount: invoice.total_amount,
+          currency: invoice.currency
+        }
+      }),
+    });
+
+    if (response.ok) {
+      const clientName = invoice.client?.client_name || 'client';
+      toast.success(`Invoice ${invoice.invoice_number} sent to ${recipientEmail}`);
+      return true;
+    } else {
+      throw new Error('Failed to send email');
+    }
   } catch (error) {
+    console.error('Error sending invoice:', error);
     toast.error("Failed to send invoice");
+    return false;
   }
 };
 

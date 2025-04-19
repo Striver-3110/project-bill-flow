@@ -23,6 +23,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { mailInvoice } from "@/utils/invoiceActions";
 
 interface MailInvoiceDialogProps {
   invoice: Invoice;
@@ -51,12 +52,19 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
   const onSubmit = async (data: z.infer<typeof mailSchema>) => {
     setIsSending(true);
     try {
-      // In a real app, this would call an API to send the email
-      // For now, we'll just simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success(`Invoice sent to ${data.recipientEmail}`);
-      setOpen(false);
+      // Use the updated mailInvoice function to send the email
+      const success = await mailInvoice(
+        invoice,
+        data.recipientEmail,
+        data.subject,
+        data.message || ''
+      );
+      
+      if (success) {
+        setOpen(false);
+      }
     } catch (error) {
+      console.error("Error in sending email:", error);
       toast.error("Failed to send invoice");
     } finally {
       setIsSending(false);
