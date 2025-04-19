@@ -28,6 +28,19 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { TimeEntryDialog } from "@/components/ui/timeEntry";
+import { Pencil, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,6 +49,7 @@ const Projects = () => {
     projectStats, 
     timeEntries,
     isLoadingProjects, 
+    deleteProject,
     calculateProjectProgress,
     getMonthlyTimeData
   } = useProjects();
@@ -88,6 +102,16 @@ const Projects = () => {
     { name: "James Wilson", hours: 155, utilization: 88, role: "UX Designer" },
     { name: "Emily Taylor", hours: 150, utilization: 86, role: "Business Analyst" },
   ];
+
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await deleteProject.mutateAsync(projectId);
+      toast.success("Project deleted successfully");
+    } catch (error) {
+      console.error("Delete project error:", error);
+      toast.error("Failed to delete project");
+    }
+  };
 
   if (isLoadingProjects) {
     return (
@@ -204,12 +228,11 @@ const Projects = () => {
                       <TableHead>Status</TableHead>
                       <TableHead>Team Size</TableHead>
                       <TableHead>Budget</TableHead>
-                      <TableHead>Progress</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredProjects.map((project) => {
-                      const progress = calculateProjectProgress(project.project_id);
                       const stats = projectStats?.find(s => s.project_id === project.project_id);
                       const teamSize = stats?.team_size || project.assignments?.length || 0;
 
@@ -227,20 +250,44 @@ const Projects = () => {
                           </TableCell>
                           <TableCell>{teamSize}</TableCell>
                           <TableCell>${project.budget.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                              <div 
-                                className={`h-2.5 rounded-full ${
-                                  project.status === "COMPLETED" 
-                                    ? "bg-green-600" 
-                                    : project.status === "ON_HOLD" 
-                                    ? "bg-yellow-500" 
-                                    : "bg-blue-600"
-                                }`}
-                                style={{ width: `${progress}%` }}
-                              ></div>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => toast.info("Edit functionality coming soon!")}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this project? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteProject(project.project_id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
-                            <span className="text-xs text-gray-500 mt-1">{progress}%</span>
                           </TableCell>
                         </TableRow>
                       );

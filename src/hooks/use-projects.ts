@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
@@ -134,30 +133,42 @@ export const useProjects = () => {
     },
   });
 
-  // Calculate project progress
+  const deleteProject = useMutation({
+    mutationFn: async (projectId: string) => {
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("project_id", projectId);
+
+      if (error) {
+        console.error("Project deletion error:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project_statistics"] });
+    },
+  });
+
   const calculateProjectProgress = (projectId: string) => {
     if (!projects || !timeEntries) return 0;
     
     const project = projects.find(p => p.project_id === projectId);
     if (!project) return 0;
     
-    // Calculate progress based on time entries
     const projectTimeEntries = timeEntries.filter(entry => entry.project_id === projectId);
     const totalHoursLogged = projectTimeEntries.reduce((sum, entry) => sum + (entry.hours || 0), 0);
     
-    // Simple progress calculation (can be improved with more sophisticated logic)
-    // Assume 100 hours for completion if no budget or other metric is available
     const estimatedTotalHours = 100;
     const progress = Math.min(Math.round((totalHoursLogged / estimatedTotalHours) * 100), 100);
     
     return progress;
   };
 
-  // Prepare chart data
   const getMonthlyTimeData = () => {
     if (!timeEntries) return [];
     
-    // Group time entries by month
     const monthMap = new Map();
     
     timeEntries.forEach(entry => {
@@ -181,10 +192,9 @@ export const useProjects = () => {
       }
     });
     
-    // Convert map to array and sort by date
     return Array.from(monthMap.values())
       .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
-      .slice(-6); // Get last 6 months
+      .slice(-6);
   };
 
   return {
@@ -194,6 +204,7 @@ export const useProjects = () => {
     isLoadingProjects,
     createProject,
     updateProject,
+    deleteProject,
     addTimeEntry,
     calculateProjectProgress,
     getMonthlyTimeData
