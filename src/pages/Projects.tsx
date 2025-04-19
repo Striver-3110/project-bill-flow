@@ -19,7 +19,8 @@ const Projects = () => {
     projectStats, 
     timeEntries,
     isLoadingProjects, 
-    deleteProject
+    deleteProject,
+    getMonthlyTimeData
   } = useProjects();
   
   const filteredProjects = projects?.filter(
