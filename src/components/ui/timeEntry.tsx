@@ -5,6 +5,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/hooks/use-projects";
+import { useEmployees } from "@/hooks/use-employees";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,6 +43,7 @@ import { toast } from "sonner";
 
 interface FormData {
   project_id: string;
+  employee_id: string;
   date: Date | undefined;
   hours: number;
   description: string;
@@ -51,10 +53,12 @@ interface FormData {
 export function TimeEntryDialog() {
   const [open, setOpen] = useState(false);
   const { projects, addTimeEntry } = useProjects();
+  const { employees } = useEmployees();
   
   const form = useForm<FormData>({
     defaultValues: {
       project_id: "",
+      employee_id: "",
       date: new Date(),
       hours: 0,
       description: "",
@@ -66,6 +70,11 @@ export function TimeEntryDialog() {
     try {
       if (!data.project_id) {
         toast.error("Please select a project");
+        return;
+      }
+      
+      if (!data.employee_id) {
+        toast.error("Please select an employee");
         return;
       }
       
@@ -81,7 +90,7 @@ export function TimeEntryDialog() {
 
       await addTimeEntry.mutateAsync({
         project_id: data.project_id,
-        employee_id: "00000000-0000-0000-0000-000000000000", // Using a placeholder employee ID
+        employee_id: data.employee_id,
         date: data.date.toISOString().split('T')[0],
         hours: data.hours,
         description: data.description,
@@ -132,6 +141,34 @@ export function TimeEntryDialog() {
                       {projects?.map((project) => (
                         <SelectItem key={project.project_id} value={project.project_id}>
                           {project.project_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="employee_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employee</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an employee" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {employees?.map((employee) => (
+                        <SelectItem key={employee.employee_id} value={employee.employee_id}>
+                          {employee.first_name} {employee.last_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
