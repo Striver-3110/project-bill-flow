@@ -88,15 +88,14 @@ export const ProjectList = ({
               <TableCell>${project.budget.toLocaleString()}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    as={Link}
-                    to={`/projects/${project.project_id}`}
-                    title="View Project Details"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                  <Link to={`/projects/${project.project_id}`} title="View Project Details">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     variant="outline"
                     size="icon"
