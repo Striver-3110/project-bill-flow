@@ -98,7 +98,7 @@ const Clients = () => {
   return (
     <div className="space-y-6 overflow-y-auto scrollbar-none">
       <div className="flex justify-between items-center">
-        <div className="flex">
+        <div className="flex flex-col">
           <h1 className="text-2xl font-bold text-billflow-gray-900">Clients</h1>
           <p className="text-billflow-gray-500 mt-1">
             Manage your client relationships
