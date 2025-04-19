@@ -1,13 +1,11 @@
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectMutations } from "./use-project-mutations";
 import { useTimeEntryMutations } from "./use-time-entry-mutations";
 import { getMonthlyTimeData } from "@/utils/projectCalculations";
 
 export const useProjects = () => {
-  const queryClient = useQueryClient();
-  
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -51,10 +49,7 @@ export const useProjects = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("time_entries")
-        .select(`
-          *,
-          employee:employees(first_name, last_name)
-        `);
+        .select("*");
 
       if (error) {
         console.error("Time entries fetch error:", error);
@@ -67,10 +62,6 @@ export const useProjects = () => {
   const { createProject, updateProject, deleteProject } = useProjectMutations();
   const { addTimeEntry } = useTimeEntryMutations();
 
-  const getProjectTimeEntries = (projectId: string) => {
-    return timeEntries?.filter(entry => entry.project_id === projectId) || [];
-  };
-
   return {
     projects,
     projectStats,
@@ -80,9 +71,6 @@ export const useProjects = () => {
     updateProject,
     deleteProject,
     addTimeEntry,
-    getProjectTimeEntries,
     getMonthlyTimeData: () => getMonthlyTimeData(timeEntries || []),
-    queryClient,
   };
 };
-

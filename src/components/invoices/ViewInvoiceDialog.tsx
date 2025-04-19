@@ -7,7 +7,6 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
@@ -23,18 +22,12 @@ export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      }}>
+      <DialogTrigger asChild>
         {trigger || <Button variant="ghost" size="sm">View</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px] z-[100]" onClick={(e) => e.stopPropagation()}>
+      <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>Invoice {invoice.invoice_number}</DialogTitle>
-          <DialogDescription>
-            View the details of this invoice
-          </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
@@ -70,11 +63,18 @@ export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) 
               <p className="font-semibold">{formatCurrency(invoice.total_amount, invoice.currency)}</p>
             </div>
           </div>
+
+          {invoice.notes && (
+            <div>
+              <h3 className="font-medium">Notes</h3>
+              <p>{invoice.notes}</p>
+            </div>
+          )}
         </div>
         
         <div className="flex justify-end">
           <DialogClose asChild>
-            <Button variant="outline" onClick={(e) => e.stopPropagation()}>Close</Button>
+            <Button variant="outline">Close</Button>
           </DialogClose>
         </div>
       </DialogContent>

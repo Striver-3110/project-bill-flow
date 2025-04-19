@@ -75,13 +75,10 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      }}>
+      <DialogTrigger asChild>
         {trigger || <Button variant="ghost" size="sm">Mail</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] z-[100]" onClick={(e) => e.stopPropagation()}>
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Send Invoice {invoice.invoice_number}</DialogTitle>
           <DialogDescription>
@@ -151,9 +148,9 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
             
             <div className="flex justify-end space-x-2 pt-2">
               <DialogClose asChild>
-                <Button type="button" variant="outline" onClick={(e) => e.stopPropagation()}>Cancel</Button>
+                <Button type="button" variant="outline">Cancel</Button>
               </DialogClose>
-              <Button type="submit" disabled={isSending} onClick={(e) => e.stopPropagation()}>
+              <Button type="submit" disabled={isSending}>
                 {isSending ? "Sending..." : "Send Invoice"}
               </Button>
             </div>

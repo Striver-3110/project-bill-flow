@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   Search, 
@@ -6,7 +7,7 @@ import {
   Trash,
   Mail,
   Download,
-  Printer
+  Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +23,6 @@ import { ViewInvoiceDialog } from "@/components/invoices/ViewInvoiceDialog";
 import { MailInvoiceDialog } from "@/components/invoices/MailInvoiceDialog";
 import { DownloadInvoiceDialog } from "@/components/invoices/DownloadInvoiceDialog";
 import { PrintInvoiceDialog } from "@/components/invoices/PrintInvoiceDialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -194,65 +189,80 @@ const Invoices = () => {
                         <StatusBadge status={getValidStatus(invoice.status)} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-2">
-                          <ViewInvoiceDialog 
-                            invoice={invoice}
-                            trigger={
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                          
-                          <EditInvoiceDialog 
-                            invoice={invoice} 
-                            onInvoiceUpdated={refetch}
-                            trigger={
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                          
-                          <MailInvoiceDialog 
-                            invoice={invoice}
-                            trigger={
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <Mail className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                          
-                          <DownloadInvoiceDialog 
-                            invoice={invoice}
-                            trigger={
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                          
-                          <PrintInvoiceDialog 
-                            invoice={invoice}
-                            trigger={
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <Printer className="h-4 w-4" />
-                              </Button>
-                            }
-                          />
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:text-red-600"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteInvoice(invoice.invoice_id || invoice.id);
-                            }}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <ViewInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-blue-600 mr-1"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <EditInvoiceDialog 
+                          invoice={invoice} 
+                          onInvoiceUpdated={refetch}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-blue-600 mr-1"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <MailInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-gray-600 mr-1"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <DownloadInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-gray-600 mr-1"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <PrintInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-gray-600 mr-1"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600"
+                          onClick={() => deleteInvoice(invoice.invoice_id || invoice.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
                       </td>
                     </tr>
                   );

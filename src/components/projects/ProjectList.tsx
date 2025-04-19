@@ -25,11 +25,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ProjectAssignmentDialog } from "./ProjectAssignmentDialog";
-import { EditProjectDialog } from "./EditProjectDialog";
-import type { Project } from "@/types";
 
-// Define a local Project type for backward compatibility if needed
-interface ProjectItem {
+interface Project {
   project_id: string;
   project_name: string;
   client?: { client_name: string };
@@ -43,13 +40,11 @@ interface ProjectItem {
 export const ProjectList = ({ 
   projects,
   projectStats,
-  handleDeleteProject,
-  handleProjectUpdated
+  handleDeleteProject 
 }: { 
-  projects: ProjectItem[];
+  projects: Project[];
   projectStats: any[];
   handleDeleteProject: (id: string) => Promise<void>;
-  handleProjectUpdated: (project: Project) => void;
 }) => {
   if (!projects.length) {
     return (
@@ -113,18 +108,13 @@ export const ProjectList = ({
                       <Eye className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <EditProjectDialog
-                    project={project as unknown as Project}
-                    onProjectUpdated={handleProjectUpdated}
-                    trigger={
-                      <Button
-                        variant="outline"
-                        size="icon"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => toast.info("Edit functionality coming soon!")}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button

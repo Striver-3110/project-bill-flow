@@ -7,7 +7,6 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
@@ -136,28 +135,19 @@ export function PrintInvoiceDialog({ invoice, trigger }: PrintInvoiceDialogProps
     }
   };
 
-  const handlePrintPreview = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePrintPreview = () => {
     setOpen(false);
     handlePrint();
   };
 
-  // Prevent default behavior that could cause dialog to close unexpectedly
-  const handleDialogInteraction = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <DialogTrigger asChild>
         {trigger || <Button variant="ghost" size="sm">Print</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]" onClick={handleDialogInteraction}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Print Invoice {invoice.invoice_number}</DialogTitle>
-          <DialogDescription>
-            Choose a print option for this invoice
-          </DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-1 gap-4 py-4">
@@ -166,7 +156,7 @@ export function PrintInvoiceDialog({ invoice, trigger }: PrintInvoiceDialogProps
             Print Invoice
           </Button>
           
-          <Button className="flex items-center justify-start" variant="outline" onClick={(e) => e.stopPropagation()}>
+          <Button className="flex items-center justify-start" variant="outline">
             <LayoutTemplate className="mr-2" size={20} />
             Layout Settings
           </Button>
@@ -174,7 +164,7 @@ export function PrintInvoiceDialog({ invoice, trigger }: PrintInvoiceDialogProps
         
         <div className="flex justify-end">
           <DialogClose asChild>
-            <Button variant="outline" onClick={(e) => e.stopPropagation()}>Cancel</Button>
+            <Button variant="outline">Cancel</Button>
           </DialogClose>
         </div>
       </DialogContent>
