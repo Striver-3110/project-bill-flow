@@ -169,7 +169,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6 overflow-y-auto scrollbar-none">
+    <div className="space-y-6 overflow-y-auto scrollbar-none p-4">
       <div>
         <h1 className="text-2xl font-bold text-billflow-gray-900">Dashboard</h1>
         <p className="text-billflow-gray-500 mt-1">
@@ -177,7 +177,7 @@ const Dashboard = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Projects"
           value={totalProjects}
@@ -208,7 +208,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Invoiced"
           value={formatCurrency(totalInvoiced)}
