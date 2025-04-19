@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Calendar as CalendarIcon, Briefcase } from "lucide-react";
@@ -45,7 +44,6 @@ export function NewProjectDialog() {
   const { createProject } = useProjects();
   const { toast } = useToast();
   
-  // Initialize with default values to prevent uncontrolled to controlled input warnings
   const form = useForm<FormData>({
     defaultValues: {
       project_name: "",
