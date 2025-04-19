@@ -16,7 +16,10 @@ const projectSchema = z.object({
   description: z.string().optional(),
   start_date: z.string().min(1, "Start date is required"),
   end_date: z.string().min(1, "End date is required"),
-  budget: z.string().min(1, "Budget is required").transform(value => Number(value)),
+  budget: z.preprocess(
+    (val) => (val === '' ? 0 : Number(val)),
+    z.number().nonnegative("Budget must be a positive number")
+  ),
   status: z.enum(["ACTIVE", "COMPLETED", "ON_HOLD"])
 });
 
@@ -34,11 +37,11 @@ export function EditProjectDialog({ project, onProjectUpdated, trigger }: EditPr
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
-      project_name: project.project_name,
+      project_name: project.project_name || project.name,
       description: project.description || "",
       start_date: project.start_date.split('T')[0],
-      end_date: project.end_date.split('T')[0],
-      budget: project.budget.toString(),
+      end_date: project.end_date?.split('T')[0] || "",
+      budget: Number(project.budget), // Convert to number here
       status: project.status as "ACTIVE" | "COMPLETED" | "ON_HOLD"
     },
   });
@@ -63,7 +66,14 @@ export function EditProjectDialog({ project, onProjectUpdated, trigger }: EditPr
 
       toast.success("Project updated successfully");
       setOpen(false);
-      onProjectUpdated(updatedProject as Project);
+      
+      // Convert to the expected Project type
+      const convertedProject: Project = {
+        ...updatedProject,
+        name: updatedProject.project_name, // Ensure the name is set for backward compatibility
+      } as Project;
+      
+      onProjectUpdated(convertedProject);
     } catch (error) {
       console.error("Error updating project:", error);
       toast.error("Failed to update project");
