@@ -22,7 +22,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           <div className="hidden lg:flex items-center gap-3">
             
             <div className="flex items-end">
-              <span className="text-gray-500 text-sm">Powered by</span>
+              <span className="text-gray-500 pb-2 text-sm">Powered by</span>
               <img 
                 src="https://i.ibb.co/Z6nDP1Fx/top.png" 
                 alt="Incubyte Logo" 
