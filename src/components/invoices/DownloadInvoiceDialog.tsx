@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Dialog,
@@ -6,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
@@ -68,6 +70,7 @@ export function DownloadInvoiceDialog({ invoice, trigger }: DownloadInvoiceDialo
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Download Invoice {invoice.invoice_number}</DialogTitle>
+          <DialogDescription>Choose a format to download your invoice</DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-1 gap-4 py-4">
