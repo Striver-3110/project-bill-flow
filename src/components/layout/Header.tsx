@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Menu } from 'lucide-react';
 
@@ -19,19 +18,28 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <span className="sr-only">Toggle Menu</span>
           </button>
           
-          <div className="flex items-center gap-2 hidden lg:flex">
-            <a href="https://ibb.co/5WZ6TnXH"><img src="https://i.ibb.co/5WZ6TnXH/bottom.png" alt="bottom" border="0" /></a> 
-            <a href="https://ibb.co/Y7zsMT1h"><img src="https://i.ibb.co/Y7zsMT1h/top.png" alt="top" border="0" /></a>
-            <div className="font-medium text-lg flex items-center">
-              <span className="text-gray-500">Powered by</span>
-              <span className="text-primary font-bold ml-1">Incubyte</span>
+          {/* Desktop logo and text */}
+          <div className="hidden lg:flex items-center gap-3">
+            <img 
+              src="https://i.ibb.co/Z6nDP1Fx/top.png" 
+              alt="Incubyte Logo" 
+              className="h-8 w-auto" 
+            />
+            <div className="flex items-center">
+              <span className="text-gray-500 text-sm">Powered by</span>
+              <span className="text-primary font-semibold ml-1 text-sm">Incubyte</span>
             </div>
           </div>
           
           {/* Mobile logo and text */}
           <div className="lg:hidden flex items-center gap-1">
-            <span className="text-sm text-gray-500">Powered by</span>
-            <span className="text-primary font-bold text-sm">Incubyte</span>
+            <img 
+              src="https://i.ibb.co/Z6nDP1Fx/top.png" 
+              alt="Incubyte Logo" 
+              className="h-6 w-auto mr-1" 
+            />
+            <span className="text-xs text-gray-500">Powered by</span>
+            <span className="text-primary font-semibold text-xs">Incubyte</span>
           </div>
         </div>
       </div>
