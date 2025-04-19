@@ -10,6 +10,10 @@ export interface Invoice {
   items: InvoiceItem[];
   total_amount: number;
   currency: string; // Required for ReminderDialog
+  client?: {
+    client_name: string;
+    [key: string]: any;
+  }; // Adding optional client property
   notes?: string;
   created_at?: string;
   updated_at?: string;
