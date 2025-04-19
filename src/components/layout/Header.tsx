@@ -30,11 +30,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           </button>
           
           <div className="flex items-center gap-2 hidden lg:flex">
-            <img 
-              src="https://ibb.co/Y7zsMT1h" 
-              alt="Incubyte Logo" 
-              className="h-8 w-auto" 
-            />
+            <a href="https://ibb.co/5WZ6TnXH"><img src="https://i.ibb.co/5WZ6TnXH/bottom.png" alt="bottom" border="0"></a> <a href="https://ibb.co/Y7zsMT1h"><img src="https://i.ibb.co/Y7zsMT1h/top.png" alt="top" border="0"></a>
             <div className="font-medium text-lg flex items-center">
               <span className="text-gray-500">Powered by</span>
               <span className="text-primary font-bold ml-1">Incubyte</span>
