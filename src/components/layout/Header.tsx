@@ -27,6 +27,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <img 
               src="https://i.ibb.co/Y7zsMT1h/top.png" 
               alt="top" 
+              className="w-[120px] h-auto"
             />
             <div className="font-medium text-lg flex items-center">
               <span className="text-gray-500">Powered by</span>
