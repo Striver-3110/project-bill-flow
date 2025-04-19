@@ -7,6 +7,7 @@ import {
   Eye,
   Edit,
   Trash,
+  Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -172,6 +173,9 @@ export default function Invoices() {
                       </Button>
                       <Button variant="ghost" size="sm" className="text-billflow-gray-600 mr-1">
                         <Download className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-billflow-gray-600 mr-1">
+                        <Printer className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 

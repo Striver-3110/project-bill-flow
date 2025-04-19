@@ -22,6 +22,33 @@ export type CreateInvoiceInput = {
     amount: number;
     tax_amount: number;
     total_amount: number;
+    project_id?: string;
+    employee_id?: string;
+  }[];
+};
+
+export type ClientProjectData = {
+  client_id: string;
+  client_name: string;
+  projects: {
+    project_id: string;
+    project_name: string;
+    status: string;
+    employees: {
+      employee_id: string;
+      full_name: string;
+      department: string;
+      role: string;
+      time_entries: {
+        hours: number;
+        billable: boolean;
+        date: string;
+        description: string;
+      }[];
+      total_hours: number;
+      total_billable_amount: number;
+      cost_rate: number;
+    }[];
   }[];
 };
 
@@ -43,6 +70,114 @@ export function useInvoices() {
       return data;
     }
   });
+
+  const getClientProjectDataForInvoice = async (
+    clientId: string, 
+    startDate: string, 
+    endDate: string
+  ): Promise<ClientProjectData | null> => {
+    try {
+      // Get client info
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('id, client_name')
+        .eq('id', clientId)
+        .single();
+      
+      if (clientError) throw clientError;
+      
+      // Get projects for this client
+      const { data: projectsData, error: projectsError } = await supabase
+        .from('projects')
+        .select('project_id, project_name, status')
+        .eq('client_id', clientId);
+      
+      if (projectsError) throw projectsError;
+      
+      if (!projectsData.length) {
+        return {
+          client_id: clientData.id,
+          client_name: clientData.client_name,
+          projects: []
+        };
+      }
+
+      // For each project, get assigned employees and their time entries
+      const projects = await Promise.all(projectsData.map(async (project) => {
+        // Get project assignments with employee info
+        const { data: assignmentsData, error: assignmentsError } = await supabase
+          .from('project_assignments')
+          .select(`
+            assignment_id,
+            employee_id,
+            role,
+            employee:employees(
+              employee_id,
+              first_name,
+              last_name,
+              department,
+              cost_rate
+            )
+          `)
+          .eq('project_id', project.project_id)
+          .eq('status', 'ACTIVE');
+        
+        if (assignmentsError) throw assignmentsError;
+        
+        // If no assignments, return project with empty employees array
+        if (!assignmentsData.length) {
+          return {
+            ...project,
+            employees: []
+          };
+        }
+
+        // For each assigned employee, get time entries for the date range
+        const employees = await Promise.all(assignmentsData.map(async (assignment) => {
+          const { data: timeEntriesData, error: timeEntriesError } = await supabase
+            .from('time_entries')
+            .select('hours, billable, date, description')
+            .eq('project_id', project.project_id)
+            .eq('employee_id', assignment.employee_id)
+            .gte('date', startDate)
+            .lte('date', endDate);
+          
+          if (timeEntriesError) throw timeEntriesError;
+          
+          const totalHours = timeEntriesData.reduce((sum, entry) => 
+            sum + (entry.billable ? entry.hours : 0), 0);
+          
+          const costRate = assignment.employee?.cost_rate || 0;
+          const totalBillableAmount = totalHours * costRate;
+          
+          return {
+            employee_id: assignment.employee_id,
+            full_name: `${assignment.employee.first_name} ${assignment.employee.last_name}`,
+            department: assignment.employee.department,
+            role: assignment.role,
+            time_entries: timeEntriesData,
+            total_hours: totalHours,
+            total_billable_amount: totalBillableAmount,
+            cost_rate: costRate
+          };
+        }));
+        
+        return {
+          ...project,
+          employees: employees.filter(emp => emp.total_hours > 0) // Only include employees with billable hours
+        };
+      }));
+
+      return {
+        client_id: clientData.id,
+        client_name: clientData.client_name,
+        projects: projects.filter(p => p.employees.length > 0) // Only include projects with billable employees
+      };
+    } catch (error) {
+      console.error("Error fetching client project data:", error);
+      return null;
+    }
+  };
 
   const createInvoiceMutation = useMutation({
     mutationFn: async (input: CreateInvoiceInput) => {
@@ -119,6 +254,7 @@ export function useInvoices() {
     error,
     deleteInvoice: deleteInvoiceMutation.mutate,
     createInvoice: createInvoiceMutation.mutate,
-    isCreating: createInvoiceMutation.isPending
+    isCreating: createInvoiceMutation.isPending,
+    getClientProjectDataForInvoice
   };
 }
