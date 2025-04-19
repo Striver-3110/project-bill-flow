@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { Calendar as CalendarIcon, UserPlus, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -40,9 +40,10 @@ import { ProjectAssignment, useProjectAssignments } from "@/hooks/use-project-as
 interface ProjectAssignmentDialogProps {
   projectId: string;
   projectName: string;
+  children: ReactNode; // Add children prop
 }
 
-export function ProjectAssignmentDialog({ projectId, projectName }: ProjectAssignmentDialogProps) {
+export function ProjectAssignmentDialog({ projectId, projectName, children }: ProjectAssignmentDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { employees } = useEmployees();
@@ -61,9 +62,9 @@ export function ProjectAssignmentDialog({ projectId, projectName }: ProjectAssig
   const form = useForm<Omit<ProjectAssignment, "project_id" | "status">>({
     defaultValues: {
       employee_id: "",
-      role: "", // Include role field in default values
+      role: "",
       start_date: new Date().toISOString().split('T')[0],
-      end_date: "", // Provide default empty string for end_date
+      end_date: "", 
     }
   });
 
@@ -95,10 +96,7 @@ export function ProjectAssignmentDialog({ projectId, projectName }: ProjectAssig
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Assign Employee
-        </Button>
+        {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -277,4 +275,30 @@ export function ProjectAssignmentDialog({ projectId, projectName }: ProjectAssig
       </DialogContent>
     </Dialog>
   );
+  
+  function onSubmit(data: Omit<ProjectAssignment, "project_id" | "status">) {
+    try {
+      if (!data.employee_id) {
+        return;
+      }
+      
+      setIsSubmitting(true);
+      
+      const assignmentData: ProjectAssignment = {
+        ...data,
+        project_id: projectId,
+        status: 'ACTIVE',
+      };
+      
+      addAssignment.mutateAsync(assignmentData).then(() => {
+        setOpen(false);
+        form.reset();
+      }).finally(() => {
+        setIsSubmitting(false);
+      });
+    } catch (error) {
+      console.error("Assignment error:", error);
+      setIsSubmitting(false);
+    }
+  }
 }

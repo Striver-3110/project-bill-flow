@@ -7,10 +7,10 @@ export type ProjectAssignment = {
   assignment_id?: string;
   project_id: string;
   employee_id: string;
-  role: string; // Added role property which is required by the database
+  role: string; // Role property is required
   start_date: string;
-  end_date: string; // Changed from optional to required to match schema
-  status: 'ACTIVE' | 'COMPLETED'; // Updated to match schema enum
+  end_date: string;
+  status: 'ACTIVE' | 'COMPLETED';
 };
 
 export const useProjectAssignments = (projectId?: string) => {
