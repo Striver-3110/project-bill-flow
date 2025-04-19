@@ -1,4 +1,3 @@
-
 type HeaderProps = {
   toggleSidebar: () => void;
 };
@@ -29,9 +28,24 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             </svg>
             <span className="sr-only">Toggle Menu</span>
           </button>
-          <h1 className="font-bold text-xl text-primary hidden lg:block">
-            Employee Management
-          </h1>
+          
+          <div className="flex items-center gap-2 hidden lg:flex">
+            <img 
+              src="https://ibb.co/Y7zsMT1h" 
+              alt="Incubyte Logo" 
+              className="h-8 w-auto" 
+            />
+            <div className="font-medium text-lg flex items-center">
+              <span className="text-gray-500">Powered by</span>
+              <span className="text-primary font-bold ml-1">Incubyte</span>
+            </div>
+          </div>
+          
+          {/* Mobile logo and text */}
+          <div className="lg:hidden flex items-center gap-1">
+            <span className="text-sm text-gray-500">Powered by</span>
+            <span className="text-primary font-bold text-sm">Incubyte</span>
+          </div>
         </div>
       </div>
     </header>
