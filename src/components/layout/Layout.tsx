@@ -1,20 +1,21 @@
-
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import ChatButton from "../chat/ChatButton";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
-const Layout: React.FC<LayoutProps> = ({
-  children
-}) => {
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
   };
-  return <div className="flex min-h-screen bg-gray-50">
+  return (
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar isMobile={isMobile} isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -24,6 +25,9 @@ const Layout: React.FC<LayoutProps> = ({
           {children}
         </main>
       </div>
-    </div>;
+      <ChatButton />
+    </div>
+  );
 };
+
 export default Layout;
