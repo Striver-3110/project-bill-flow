@@ -26,41 +26,54 @@ import {
   Line,
   Legend,
 } from "recharts";
+import { toast } from "sonner";
+import { TimeEntryDialog } from "@/components/ui/timeEntry";
 
 const Projects = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { projects, projectStats, isLoadingProjects } = useProjects();
+  const { 
+    projects, 
+    projectStats, 
+    timeEntries,
+    isLoadingProjects, 
+    calculateProjectProgress,
+    getMonthlyTimeData
+  } = useProjects();
   
   const filteredProjects = projects?.filter(
     project => 
       project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      project.client?.client_name.toLowerCase().includes(searchTerm.toLowerCase())
+      (project.client?.client_name && project.client.client_name.toLowerCase().includes(searchTerm.toLowerCase()))
   ) ?? [];
+
+  // Project status counts
+  const activeProjects = projects?.filter(p => p.status === 'ACTIVE') ?? [];
+  const completedProjects = projects?.filter(p => p.status === 'COMPLETED') ?? [];
+  const onHoldProjects = projects?.filter(p => p.status === 'ON_HOLD') ?? [];
 
   const projectStatistics = {
     totalProjects: projects?.length ?? 0,
-    activeProjects: projects?.filter(p => p.status === 'ACTIVE').length ?? 0,
-    completedProjects: projects?.filter(p => p.status === 'COMPLETED').length ?? 0,
-    onHoldProjects: projects?.filter(p => p.status === 'ON_HOLD').length ?? 0,
-    totalEmployeesAssigned: projectStats?.reduce((acc, curr) => acc + (curr.team_size ?? 0), 0) ?? 0,
-    totalHoursLogged: projectStats?.reduce((acc, curr) => acc + (curr.total_hours ?? 0), 0) ?? 0,
+    activeProjects: activeProjects.length,
+    completedProjects: completedProjects.length,
+    onHoldProjects: onHoldProjects.length,
+    totalEmployeesAssigned: projectStats?.reduce((acc, curr) => acc + (curr.team_size || 0), 0) ?? 0,
+    totalHoursLogged: timeEntries?.reduce((acc, entry) => acc + (entry.hours || 0), 0) ?? 0,
+    totalBudget: projects?.reduce((sum, p) => sum + (p.budget || 0), 0) ?? 0,
+    billableAmount: timeEntries?.filter(e => e.billable)
+      .reduce((sum, e) => sum + (e.hours || 0) * 100, 0) ?? 0, // Assuming $100/hour rate
   };
 
+  // Status data for pie chart
   const statusData = [
     { name: "Active", value: projectStatistics.activeProjects, color: "#10B981" },
     { name: "Completed", value: projectStatistics.completedProjects, color: "#6366F1" },
     { name: "On Hold", value: projectStatistics.onHoldProjects, color: "#F59E0B" },
   ];
 
-  const monthlyHoursData = [
-    { month: "Jan", hours: 720, billable: 680, target: 800 },
-    { month: "Feb", hours: 680, billable: 650, target: 800 },
-    { month: "Mar", hours: 750, billable: 720, target: 800 },
-    { month: "Apr", hours: 800, billable: 780, target: 800 },
-    { month: "May", hours: 720, billable: 700, target: 800 },
-    { month: "Jun", hours: 840, billable: 820, target: 800 },
-  ];
+  // Monthly hours data from timeEntries
+  const monthlyHoursData = getMonthlyTimeData();
 
+  // Assignment data - will use sample until we have real team data
   const teamAssignmentData = [
     { name: "Engineering", value: 18, color: "#3B82F6" },
     { name: "Design", value: 12, color: "#EC4899" },
@@ -68,12 +81,21 @@ const Projects = () => {
     { name: "Management", value: 7, color: "#F59E0B" },
   ];
 
+  // Sample top employees until we have real data
   const topEmployees = [
     { name: "David Anderson", hours: 168, utilization: 96, role: "Senior Developer" },
     { name: "Lisa Martinez", hours: 160, utilization: 92, role: "Project Manager" },
     { name: "James Wilson", hours: 155, utilization: 88, role: "UX Designer" },
     { name: "Emily Taylor", hours: 150, utilization: 86, role: "Business Analyst" },
   ];
+
+  if (isLoadingProjects) {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -87,6 +109,7 @@ const Projects = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-[250px]"
           />
+          <TimeEntryDialog />
           <NewProjectDialog />
         </div>
       </div>
@@ -132,7 +155,7 @@ const Projects = () => {
         />
         <StatsCard
           title="Active Assignments"
-          value={38}
+          value={activeProjects.reduce((sum, p) => sum + (p.assignments?.length || 0), 0)}
           icon={UserCheck}
           description="Current assignments"
           variant="primary"
@@ -146,7 +169,7 @@ const Projects = () => {
         />
         <StatsCard
           title="Billable Amount"
-          value={`$${427600}`}
+          value={`$${projectStatistics.billableAmount.toLocaleString()}`}
           icon={DollarSign}
           description="Billable revenue"
           variant="success"
@@ -171,52 +194,71 @@ const Projects = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Project Name</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Timeline</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Team Size</TableHead>
-                    <TableHead>Budget</TableHead>
-                    <TableHead>Progress</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProjects.map((project) => (
-                    <TableRow key={project.project_id}>
-                      <TableCell className="font-medium">
-                        {project.project_name}
-                      </TableCell>
-                      <TableCell>{project.client?.client_name}</TableCell>
-                      <TableCell>
-                        {project.start_date} to {project.end_date}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={project.status.toLowerCase() as any} />
-                      </TableCell>
-                      <TableCell>{projectStatistics.totalEmployeesAssigned}</TableCell>
-                      <TableCell>${project.budget.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div 
-                            className={`h-2.5 rounded-full ${
-                              project.status === "COMPLETED" 
-                                ? "bg-green-600" 
-                                : project.status === "ON_HOLD" 
-                                ? "bg-yellow-500" 
-                                : "bg-blue-600"
-                            }`}
-                            style={{ width: `${50}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-xs text-gray-500 mt-1">{50}%</span>
-                      </TableCell>
+              {filteredProjects.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Project Name</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Timeline</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Team Size</TableHead>
+                      <TableHead>Budget</TableHead>
+                      <TableHead>Progress</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProjects.map((project) => {
+                      const progress = calculateProjectProgress(project.project_id);
+                      const stats = projectStats?.find(s => s.project_id === project.project_id);
+                      const teamSize = stats?.team_size || project.assignments?.length || 0;
+
+                      return (
+                        <TableRow key={project.project_id}>
+                          <TableCell className="font-medium">
+                            {project.project_name}
+                          </TableCell>
+                          <TableCell>{project.client?.client_name || "N/A"}</TableCell>
+                          <TableCell>
+                            {new Date(project.start_date).toLocaleDateString()} to {project.end_date ? new Date(project.end_date).toLocaleDateString() : "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={project.status.toLowerCase() as any} />
+                          </TableCell>
+                          <TableCell>{teamSize}</TableCell>
+                          <TableCell>${project.budget.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                              <div 
+                                className={`h-2.5 rounded-full ${
+                                  project.status === "COMPLETED" 
+                                    ? "bg-green-600" 
+                                    : project.status === "ON_HOLD" 
+                                    ? "bg-yellow-500" 
+                                    : "bg-blue-600"
+                                }`}
+                                style={{ width: `${progress}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-500 mt-1">{progress}%</span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchTerm ? (
+                    <p>No projects found matching "{searchTerm}". Try a different search term.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      <p>No projects found. Get started by creating your first project.</p>
+                      <NewProjectDialog />
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -239,13 +281,15 @@ const Projects = () => {
                         cx="50%"
                         cy="50%"
                         outerRadius={100}
-                        label
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       >
                         {statusData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip 
+                        formatter={(value) => [`${value} projects`, 'Count']}
+                      />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -259,25 +303,41 @@ const Projects = () => {
               </CardHeader>
               <CardContent>
                 <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={monthlyHoursData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="hours" stroke="#6366F1" name="Total Hours" />
-                      <Line type="monotone" dataKey="billable" stroke="#10B981" name="Billable Hours" />
-                      <Line type="monotone" dataKey="target" stroke="#F59E0B" name="Target Hours" strokeDasharray="5 5" />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  {monthlyHoursData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={monthlyHoursData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [`${value} hours`, '']} />
+                        <Legend />
+                        <Line 
+                          type="monotone" 
+                          dataKey="hours" 
+                          name="Total Hours" 
+                          stroke="#6366F1" 
+                          activeDot={{ r: 8 }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="billable" 
+                          name="Billable Hours" 
+                          stroke="#10B981" 
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      <p>No time data available yet</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        {/* Team Utilization Tab */}
+        {/* Team Utilization Tab - using sample data since we don't have employee time tracking yet */}
         <TabsContent value="team">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
@@ -295,13 +355,13 @@ const Projects = () => {
                         cx="50%"
                         cy="50%"
                         outerRadius={100}
-                        label
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       >
                         {teamAssignmentData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip formatter={(value) => [`${value} team members`, '']} />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -364,24 +424,37 @@ const Projects = () => {
               </CardHeader>
               <CardContent>
                 <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        { name: "Website Redesign", budget: 75000, actual: 38000 },
-                        { name: "Mobile App", budget: 120000, actual: 42000 },
-                        { name: "Data Migration", budget: 45000, actual: 45000 },
-                        { name: "Security Audit", budget: 35000, actual: 22000 },
-                      ]}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                      <Legend />
-                      <Bar dataKey="budget" fill="#6366F1" name="Budget" />
-                      <Bar dataKey="actual" fill="#10B981" name="Actual Spend" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {filteredProjects.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={filteredProjects.slice(0, 5).map(project => {
+                          // Calculate actual spend based on time entries
+                          const projectTimeEntries = timeEntries?.filter(e => e.project_id === project.project_id) || [];
+                          const actualSpend = projectTimeEntries.reduce((sum, entry) => sum + (entry.hours || 0) * 100, 0);
+                          
+                          return {
+                            name: project.project_name.length > 15 
+                              ? project.project_name.substring(0, 15) + '...' 
+                              : project.project_name,
+                            budget: project.budget,
+                            actual: actualSpend
+                          };
+                        })}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                        <Legend />
+                        <Bar dataKey="budget" fill="#6366F1" name="Budget" />
+                        <Bar dataKey="actual" fill="#10B981" name="Actual Spend" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      <p>No project data available</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -391,38 +464,53 @@ const Projects = () => {
                 <CardTitle>Billable Hours Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Project</TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Hours</TableHead>
-                      <TableHead>Billable Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProjects.map((project) => (
-                      <TableRow key={project.project_id}>
-                        <TableCell className="font-medium">{project.project_name}</TableCell>
-                        <TableCell>{project.client?.client_name}</TableCell>
-                        <TableCell>{100}</TableCell>
-                        <TableCell>${(100 * 100).toLocaleString()}</TableCell>
+                {filteredProjects.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Project</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Hours</TableHead>
+                        <TableHead>Billable Amount</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                  <tfoot>
-                    <tr className="font-medium text-primary">
-                      <td className="p-4">Total</td>
-                      <td></td>
-                      <td className="p-4">
-                        {filteredProjects.reduce((sum, p) => sum + 100, 0)}
-                      </td>
-                      <td className="p-4">
-                        ${filteredProjects.reduce((sum, p) => sum + 100 * 100, 0).toLocaleString()}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProjects.map((project) => {
+                        const projectTimeEntries = timeEntries?.filter(e => e.project_id === project.project_id) || [];
+                        const billableHours = projectTimeEntries
+                          .filter(entry => entry.billable)
+                          .reduce((sum, entry) => sum + (entry.hours || 0), 0);
+                        const billableAmount = billableHours * 100; // Assuming $100/hour rate
+                        
+                        return (
+                          <TableRow key={project.project_id}>
+                            <TableCell className="font-medium">{project.project_name}</TableCell>
+                            <TableCell>{project.client?.client_name || "N/A"}</TableCell>
+                            <TableCell>{billableHours.toFixed(1)}</TableCell>
+                            <TableCell>${billableAmount.toLocaleString()}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                    <tfoot>
+                      <tr className="font-medium text-primary">
+                        <td className="p-4">Total</td>
+                        <td></td>
+                        <td className="p-4">
+                          {(timeEntries?.filter(e => e.billable)
+                            .reduce((sum, entry) => sum + (entry.hours || 0), 0) || 0).toFixed(1)}
+                        </td>
+                        <td className="p-4">
+                          ${projectStatistics.billableAmount.toLocaleString()}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No billable hours data available</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
