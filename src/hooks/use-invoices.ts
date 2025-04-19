@@ -77,22 +77,35 @@ export function useInvoices() {
     endDate: string
   ): Promise<ClientProjectData | null> => {
     try {
-      // Get client info
+      // Get client info with more detailed error handling
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('id, client_name')
         .eq('id', clientId)
         .single();
       
-      if (clientError) throw clientError;
+      if (clientError) {
+        console.error("Error fetching client data:", clientError);
+        toast.error("Failed to fetch client data");
+        throw clientError;
+      }
       
-      // Get projects for this client
+      // Get projects with detailed status
       const { data: projectsData, error: projectsError } = await supabase
         .from('projects')
-        .select('project_id, project_name, status')
+        .select(`
+          project_id,
+          project_name,
+          status,
+          budget
+        `)
         .eq('client_id', clientId);
       
-      if (projectsError) throw projectsError;
+      if (projectsError) {
+        console.error("Error fetching projects:", projectsError);
+        toast.error("Failed to fetch project data");
+        throw projectsError;
+      }
       
       if (!projectsData.length) {
         return {
@@ -102,9 +115,8 @@ export function useInvoices() {
         };
       }
 
-      // For each project, get assigned employees and their time entries
+      // Enhanced project data fetching
       const projects = await Promise.all(projectsData.map(async (project) => {
-        // Get project assignments with employee info
         const { data: assignmentsData, error: assignmentsError } = await supabase
           .from('project_assignments')
           .select(`
@@ -116,23 +128,19 @@ export function useInvoices() {
               first_name,
               last_name,
               department,
-              cost_rate
+              cost_rate,
+              designation
             )
           `)
           .eq('project_id', project.project_id)
           .eq('status', 'ACTIVE');
         
-        if (assignmentsError) throw assignmentsError;
-        
-        // If no assignments, return project with empty employees array
-        if (!assignmentsData.length) {
-          return {
-            ...project,
-            employees: []
-          };
+        if (assignmentsError) {
+          console.error("Error fetching assignments:", assignmentsError);
+          throw assignmentsError;
         }
-
-        // For each assigned employee, get time entries for the date range
+        
+        // Enhanced employee data processing
         const employees = await Promise.all(assignmentsData.map(async (assignment) => {
           const { data: timeEntriesData, error: timeEntriesError } = await supabase
             .from('time_entries')
@@ -142,39 +150,65 @@ export function useInvoices() {
             .gte('date', startDate)
             .lte('date', endDate);
           
-          if (timeEntriesError) throw timeEntriesError;
+          if (timeEntriesError) {
+            console.error("Error fetching time entries:", timeEntriesError);
+            throw timeEntriesError;
+          }
           
-          const totalHours = timeEntriesData.reduce((sum, entry) => 
+          // Calculate detailed metrics for each employee
+          const billableHours = timeEntriesData.reduce((sum, entry) => 
             sum + (entry.billable ? entry.hours : 0), 0);
           
+          const nonBillableHours = timeEntriesData.reduce((sum, entry) => 
+            sum + (!entry.billable ? entry.hours : 0), 0);
+          
+          const totalHours = billableHours + nonBillableHours;
           const costRate = assignment.employee?.cost_rate || 0;
-          const totalBillableAmount = totalHours * costRate;
+          const totalBillableAmount = billableHours * costRate;
           
           return {
             employee_id: assignment.employee_id,
             full_name: `${assignment.employee.first_name} ${assignment.employee.last_name}`,
             department: assignment.employee.department,
+            designation: assignment.employee.designation,
             role: assignment.role,
-            time_entries: timeEntriesData,
+            time_entries: timeEntriesData.map(entry => ({
+              ...entry,
+              amount: entry.billable ? entry.hours * costRate : 0
+            })),
             total_hours: totalHours,
+            billable_hours: billableHours,
+            non_billable_hours: nonBillableHours,
             total_billable_amount: totalBillableAmount,
             cost_rate: costRate
           };
         }));
         
+        // Calculate project totals
+        const projectTotals = employees.reduce((totals, emp) => ({
+          totalHours: totals.totalHours + emp.total_hours,
+          billableHours: totals.billableHours + emp.billable_hours,
+          totalAmount: totals.totalAmount + emp.total_billable_amount
+        }), { totalHours: 0, billableHours: 0, totalAmount: 0 });
+
         return {
           ...project,
-          employees: employees.filter(emp => emp.total_hours > 0) // Only include employees with billable hours
+          employees: employees.filter(emp => emp.total_hours > 0),
+          project_totals: projectTotals
         };
       }));
 
       return {
         client_id: clientData.id,
         client_name: clientData.client_name,
-        projects: projects.filter(p => p.employees.length > 0) // Only include projects with billable employees
+        projects: projects.filter(p => p.employees.length > 0),
+        total_billable_amount: projects.reduce((sum, p) => sum + p.project_totals.totalAmount, 0),
+        total_hours: projects.reduce((sum, p) => sum + p.project_totals.totalHours, 0),
+        total_billable_hours: projects.reduce((sum, p) => sum + p.project_totals.billableHours, 0)
       };
     } catch (error) {
       console.error("Error fetching client project data:", error);
+      toast.error("Failed to fetch project data");
       return null;
     }
   };
