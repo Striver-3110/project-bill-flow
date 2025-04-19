@@ -35,8 +35,8 @@ interface FormData {
   project_name: string;
   description: string;
   client_id: string;
-  start_date: Date;
-  end_date: Date;
+  start_date: Date | undefined;
+  end_date: Date | undefined;
   budget: number;
 }
 
@@ -44,15 +44,38 @@ export function NewProjectDialog() {
   const [open, setOpen] = useState(false);
   const { createProject } = useProjects();
   const { toast } = useToast();
-  const form = useForm<FormData>();
+  
+  // Initialize with default values to prevent uncontrolled to controlled input warnings
+  const form = useForm<FormData>({
+    defaultValues: {
+      project_name: "",
+      description: "",
+      client_id: "",
+      start_date: undefined,
+      end_date: undefined,
+      budget: 0
+    }
+  });
 
   const onSubmit = async (data: FormData) => {
     try {
+      if (!data.start_date || !data.end_date) {
+        toast({
+          title: "Error",
+          description: "Start date and end date are required",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       await createProject.mutateAsync({
-        ...data,
-        status: 'ACTIVE',
+        project_name: data.project_name,
+        description: data.description,
+        client_id: data.client_id || "00000000-0000-0000-0000-000000000000", // Providing default client_id as it's required
         start_date: data.start_date.toISOString(),
         end_date: data.end_date.toISOString(),
+        budget: data.budget,
+        status: 'ACTIVE',
       });
       
       toast({
@@ -62,9 +85,10 @@ export function NewProjectDialog() {
       setOpen(false);
       form.reset();
     } catch (error) {
+      console.error("Project creation error:", error);
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: "Failed to create project. Please check your permissions.",
         variant: "destructive",
       });
     }
@@ -124,8 +148,8 @@ export function NewProjectDialog() {
                   <FormControl>
                     <Input 
                       type="number" 
-                      {...field} 
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      value={field.value}
                       placeholder="Enter project budget" 
                     />
                   </FormControl>

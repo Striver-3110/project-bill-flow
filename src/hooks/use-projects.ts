@@ -24,7 +24,10 @@ export const useProjects = () => {
           )
         `);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Projects fetch error:", error);
+        throw error;
+      }
       return data;
     },
   });
@@ -36,20 +39,27 @@ export const useProjects = () => {
         .from("project_statistics")
         .select("*");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Project stats fetch error:", error);
+        throw error;
+      }
       return data;
     },
   });
 
   const createProject = useMutation({
     mutationFn: async (newProject: Omit<Project, "project_id" | "created_at" | "updated_at">) => {
+      console.log("Creating project with data:", newProject);
       const { data, error } = await supabase
         .from("projects")
         .insert(newProject)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Project creation error:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
