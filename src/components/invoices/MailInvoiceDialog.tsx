@@ -80,10 +80,13 @@ export function MailInvoiceDialog({ invoice, trigger }: MailInvoiceDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <DialogTrigger asChild onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}>
         {trigger || <Button variant="ghost" size="sm">Mail</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]" onClick={handleDialogInteraction}>
+      <DialogContent className="sm:max-w-[525px] z-50" onClick={handleDialogInteraction}>
         <DialogHeader>
           <DialogTitle>Send Invoice {invoice.invoice_number}</DialogTitle>
           <DialogDescription>

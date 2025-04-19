@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   Search, 
@@ -196,7 +197,7 @@ const Invoices = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -206,11 +207,11 @@ const Invoices = () => {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-[160px]">
+                          <DropdownMenuContent align="end" className="w-[160px] z-50">
                             <ViewInvoiceDialog 
                               invoice={invoice}
                               trigger={
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                   <Eye className="mr-2 h-4 w-4" />
                                   <span>View</span>
                                 </DropdownMenuItem>
@@ -221,7 +222,7 @@ const Invoices = () => {
                               invoice={invoice} 
                               onInvoiceUpdated={refetch}
                               trigger={
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                   <Edit className="mr-2 h-4 w-4" />
                                   <span>Edit</span>
                                 </DropdownMenuItem>
@@ -231,7 +232,7 @@ const Invoices = () => {
                             <MailInvoiceDialog 
                               invoice={invoice}
                               trigger={
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                   <Mail className="mr-2 h-4 w-4" />
                                   <span>Send</span>
                                 </DropdownMenuItem>
@@ -241,7 +242,7 @@ const Invoices = () => {
                             <DownloadInvoiceDialog 
                               invoice={invoice}
                               trigger={
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                   <Download className="mr-2 h-4 w-4" />
                                   <span>Download</span>
                                 </DropdownMenuItem>
@@ -251,7 +252,7 @@ const Invoices = () => {
                             <PrintInvoiceDialog 
                               invoice={invoice}
                               trigger={
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                   <Printer className="mr-2 h-4 w-4" />
                                   <span>Print</span>
                                 </DropdownMenuItem>
@@ -260,7 +261,10 @@ const Invoices = () => {
                             
                             <DropdownMenuItem
                               className="text-red-600"
-                              onClick={() => deleteInvoice(invoice.invoice_id || invoice.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteInvoice(invoice.invoice_id || invoice.id);
+                              }}
                             >
                               <Trash className="mr-2 h-4 w-4" />
                               <span>Delete</span>

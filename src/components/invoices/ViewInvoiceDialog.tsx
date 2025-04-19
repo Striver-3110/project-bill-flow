@@ -28,10 +28,13 @@ export function ViewInvoiceDialog({ invoice, trigger }: ViewInvoiceDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <DialogTrigger asChild onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}>
         {trigger || <Button variant="ghost" size="sm">View</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]" onClick={handleDialogInteraction}>
+      <DialogContent className="sm:max-w-[625px] z-50" onClick={handleDialogInteraction}>
         <DialogHeader>
           <DialogTitle>Invoice {invoice.invoice_number}</DialogTitle>
           <DialogDescription>
