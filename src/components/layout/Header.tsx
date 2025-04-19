@@ -48,9 +48,9 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             {/* Mobile logo - simplified version */}
             <div className="relative h-8 w-8">
               <img 
-                src="/api/placeholder/32/32" 
-                alt="Mobile logo" 
-                className="object-contain h-full w-full"
+                src="https://i.ibb.co/Z6nDP1Fx/top.png" 
+                alt="Incubyte Logo" 
+                className="h-6 w-auto mr-1" 
               />
             </div>
             <div className="flex items-center">
