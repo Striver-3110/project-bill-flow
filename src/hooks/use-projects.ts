@@ -51,7 +51,10 @@ export const useProjects = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("time_entries")
-        .select("*");
+        .select(`
+          *,
+          employee:employees(first_name, last_name)
+        `);
 
       if (error) {
         console.error("Time entries fetch error:", error);
@@ -64,6 +67,10 @@ export const useProjects = () => {
   const { createProject, updateProject, deleteProject } = useProjectMutations();
   const { addTimeEntry } = useTimeEntryMutations();
 
+  const getProjectTimeEntries = (projectId: string) => {
+    return timeEntries?.filter(entry => entry.project_id === projectId) || [];
+  };
+
   return {
     projects,
     projectStats,
@@ -73,7 +80,9 @@ export const useProjects = () => {
     updateProject,
     deleteProject,
     addTimeEntry,
+    getProjectTimeEntries,
     getMonthlyTimeData: () => getMonthlyTimeData(timeEntries || []),
     queryClient,
   };
 };
+

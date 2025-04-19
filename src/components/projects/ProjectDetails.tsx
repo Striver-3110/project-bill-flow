@@ -18,7 +18,7 @@ export function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const [editTimeEntry, setEditTimeEntry] = React.useState(null);
-  const { timeEntries } = useProjects();
+  const { projects, getProjectTimeEntries } = useProjects();
   const { deleteTimeEntry } = useTimeEntryMutations();
   const { employees } = useEmployees();
 
@@ -67,7 +67,7 @@ export function ProjectDetails() {
     enabled: !!projectId,
   });
 
-  const filteredTimeEntries = timeEntries?.filter(entry => entry.project_id === projectId) || [];
+  const projectTimeEntries = getProjectTimeEntries(projectId || '');
 
   const handleDeleteTimeEntry = async (timeEntryId: string) => {
     try {
@@ -207,7 +207,7 @@ export function ProjectDetails() {
           </CardHeader>
           <CardContent>
             <TimeEntriesTable 
-              timeEntries={filteredTimeEntries}
+              timeEntries={projectTimeEntries}
               projects={[project]}
               employees={employees || []}
               onDelete={handleDeleteTimeEntry}
