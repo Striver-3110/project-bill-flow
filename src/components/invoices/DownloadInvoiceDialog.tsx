@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Dialog,
@@ -11,8 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
 import { toast } from "sonner";
-import { Download, FileText, FileSpreadsheet } from "lucide-react";
+import { FileText, FileSpreadsheet } from "lucide-react";
 import { saveAs } from "file-saver";
+import { generateInvoicePDF } from "@/utils/pdfGenerator";
 
 interface DownloadInvoiceDialogProps {
   invoice: Invoice;
@@ -24,14 +24,12 @@ export function DownloadInvoiceDialog({ invoice, trigger }: DownloadInvoiceDialo
 
   const downloadAsPDF = async () => {
     try {
-      // In a real app, this would generate a PDF
-      const clientName = invoice.client?.client_name || 'client';
-      const content = `Invoice ${invoice.invoice_number}\nClient: ${clientName}\nAmount: ${invoice.total_amount}`;
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      saveAs(blob, `invoice-${invoice.invoice_number}.pdf`);
+      const doc = generateInvoicePDF(invoice);
+      doc.save(`invoice-${invoice.invoice_number}.pdf`);
       toast.success("Invoice downloaded as PDF");
       setOpen(false);
     } catch (error) {
+      console.error("PDF generation error:", error);
       toast.error("Failed to download invoice");
     }
   };
