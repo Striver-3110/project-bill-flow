@@ -107,7 +107,6 @@ const Employees = () => {
       : 0,
     totalDepartments: departmentData.length,
     totalHours: 1640,
-    activeAssignments: 38,
     totalProjects: 12,
     assignedEmployees: employees?.filter(emp => 
       projects?.some(project => 
@@ -203,20 +202,6 @@ const Employees = () => {
           value={`${employeeStats.assignedEmployees} / ${employeeStats.totalEmployees}`}
           icon={Briefcase}
           description="Employees assigned to projects"
-          variant="primary"
-        />
-        <StatsCard
-          title="Monthly Hours"
-          value={employeeStats.totalHours}
-          icon={Clock}
-          description="Total hours logged"
-          variant="warning"
-        />
-        <StatsCard
-          title="Active Assignments"
-          value={employeeStats.activeAssignments}
-          icon={Briefcase}
-          description="Current assignments"
           variant="primary"
         />
         <StatsCard
