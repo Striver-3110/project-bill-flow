@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Search, 
@@ -7,8 +6,7 @@ import {
   Trash,
   Mail,
   Download,
-  Printer,
-  MoreHorizontal
+  Printer
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -196,81 +194,65 @@ const Invoices = () => {
                         <StatusBadge status={getValidStatus(invoice.status)} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                            >
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-[160px] z-50">
-                            <ViewInvoiceDialog 
-                              invoice={invoice}
-                              trigger={
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  <span>View</span>
-                                </DropdownMenuItem>
-                              }
-                            />
-                            
-                            <EditInvoiceDialog 
-                              invoice={invoice} 
-                              onInvoiceUpdated={refetch}
-                              trigger={
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  <span>Edit</span>
-                                </DropdownMenuItem>
-                              }
-                            />
-                            
-                            <MailInvoiceDialog 
-                              invoice={invoice}
-                              trigger={
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Mail className="mr-2 h-4 w-4" />
-                                  <span>Send</span>
-                                </DropdownMenuItem>
-                              }
-                            />
-                            
-                            <DownloadInvoiceDialog 
-                              invoice={invoice}
-                              trigger={
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Download className="mr-2 h-4 w-4" />
-                                  <span>Download</span>
-                                </DropdownMenuItem>
-                              }
-                            />
-                            
-                            <PrintInvoiceDialog 
-                              invoice={invoice}
-                              trigger={
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                  <Printer className="mr-2 h-4 w-4" />
-                                  <span>Print</span>
-                                </DropdownMenuItem>
-                              }
-                            />
-                            
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteInvoice(invoice.invoice_id || invoice.id);
-                              }}
-                            >
-                              <Trash className="mr-2 h-4 w-4" />
-                              <span>Delete</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center justify-end gap-2">
+                          <ViewInvoiceDialog 
+                            invoice={invoice}
+                            trigger={
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          
+                          <EditInvoiceDialog 
+                            invoice={invoice} 
+                            onInvoiceUpdated={refetch}
+                            trigger={
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          
+                          <MailInvoiceDialog 
+                            invoice={invoice}
+                            trigger={
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Mail className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          
+                          <DownloadInvoiceDialog 
+                            invoice={invoice}
+                            trigger={
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          
+                          <PrintInvoiceDialog 
+                            invoice={invoice}
+                            trigger={
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteInvoice(invoice.invoice_id || invoice.id);
+                            }}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
