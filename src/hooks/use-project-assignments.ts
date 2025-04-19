@@ -7,6 +7,7 @@ export type ProjectAssignment = {
   assignment_id?: string;
   project_id: string;
   employee_id: string;
+  role: string; // Added role property which is required by the database
   start_date: string;
   end_date: string; // Changed from optional to required to match schema
   status: 'ACTIVE' | 'COMPLETED'; // Updated to match schema enum

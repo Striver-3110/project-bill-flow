@@ -61,9 +61,9 @@ export function ProjectAssignmentDialog({ projectId, projectName }: ProjectAssig
   const form = useForm<Omit<ProjectAssignment, "project_id" | "status">>({
     defaultValues: {
       employee_id: "",
-      role: "",
+      role: "", // Include role field in default values
       start_date: new Date().toISOString().split('T')[0],
-      end_date: undefined,
+      end_date: "", // Provide default empty string for end_date
     }
   });
 
@@ -217,7 +217,7 @@ export function ProjectAssignmentDialog({ projectId, projectName }: ProjectAssig
                 name="end_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col w-full sm:w-1/2">
-                    <FormLabel>End Date (optional)</FormLabel>
+                    <FormLabel>End Date (Required)</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
