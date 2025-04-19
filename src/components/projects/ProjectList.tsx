@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useProjects } from "@/hooks/use-projects";
+import { ProjectAssignmentDialog } from "./ProjectAssignmentDialog";
 
 interface Project {
   project_id: string;
@@ -88,6 +88,18 @@ export const ProjectList = ({
               <TableCell>${project.budget.toLocaleString()}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
+                  <ProjectAssignmentDialog 
+                    projectId={project.project_id} 
+                    projectName={project.project_name}
+                  >
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      title="Assign Employee"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                  </ProjectAssignmentDialog>
                   <Link to={`/projects/${project.project_id}`} title="View Project Details">
                     <Button
                       variant="outline"
