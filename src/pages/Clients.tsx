@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Search, Edit, Trash, Mail, Phone, Users, Building, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/ui/status-badge";
 import { formatDate } from "@/utils/invoiceUtils";
 import AddClientDialog from "@/components/clients/AddClientDialog";
+import { EditClientDialog } from "@/components/clients/EditClientDialog";
+import { DeleteClientDialog } from "@/components/clients/DeleteClientDialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,7 +16,6 @@ const Clients = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
 
-  // Fetch clients data
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients'],
     queryFn: async () => {
@@ -29,7 +29,6 @@ const Clients = () => {
     }
   });
 
-  // Delete client function
   const deleteClient = async (clientId: string) => {
     try {
       const { error } = await supabase
@@ -40,7 +39,6 @@ const Clients = () => {
       if (error) throw error;
       toast.success("Client deleted successfully");
       
-      // Invalidate and refetch clients query
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     } catch (error) {
       toast.error("Error deleting client");
@@ -48,7 +46,10 @@ const Clients = () => {
     }
   };
 
-  // Filter clients based on search query
+  const handleClientUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+  };
+
   const filteredClients = clients?.filter(client =>
     client.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.contact_person.toLowerCase().includes(searchQuery.toLowerCase())
@@ -82,7 +83,6 @@ const Clients = () => {
         <AddClientDialog />
       </div>
 
-      {/* Filters and Search */}
       <Card className="p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-grow">
@@ -109,7 +109,6 @@ const Clients = () => {
         </div>
       </Card>
 
-      {/* Clients List */}
       <div className="bg-white rounded-lg shadow-sm border border-billflow-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-billflow-gray-200">
@@ -180,17 +179,25 @@ const Clients = () => {
                     <StatusBadge status={(client.status as "active" | "inactive") || 'active'} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button variant="ghost" size="sm" className="text-billflow-blue-600 mr-2">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-billflow-gray-600"
-                      onClick={() => deleteClient(client.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                    <EditClientDialog
+                      client={client}
+                      onClientUpdated={handleClientUpdated}
+                      trigger={
+                        <Button variant="ghost" size="sm" className="text-billflow-blue-600 mr-2">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    <DeleteClientDialog
+                      clientId={client.id}
+                      clientName={client.client_name}
+                      onClientDeleted={handleClientUpdated}
+                      trigger={
+                        <Button variant="ghost" size="sm" className="text-billflow-gray-600">
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
                   </td>
                 </tr>
               ))}
