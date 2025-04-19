@@ -27,13 +27,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                 <img 
                   src="https://i.ibb.co/Z6nDP1Fx/top.png" 
                   alt="Incubyte Logo" 
-                  className="h-6 w-auto mr-1" 
-                />
-                {/* Top logo image */}
-                <img 
-                  src="/api/placeholder/120/40" 
-                  alt="Top logo" 
-                  className="object-contain h-8 w-auto absolute top-1/2 transform -translate-y-1/2 left-0"
+                  className="h-10 w-auto mr-1" 
                 />
               </div>
             </div>
