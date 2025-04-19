@@ -7,10 +7,9 @@ export type ProjectAssignment = {
   assignment_id?: string;
   project_id: string;
   employee_id: string;
-  role: string;
   start_date: string;
-  end_date?: string;
-  status: 'ACTIVE' | 'COMPLETED';
+  end_date: string; // Changed from optional to required to match schema
+  status: 'ACTIVE' | 'COMPLETED'; // Updated to match schema enum
 };
 
 export const useProjectAssignments = (projectId?: string) => {
@@ -27,7 +26,8 @@ export const useProjectAssignments = (projectId?: string) => {
           *,
           employee:employees(employee_id, first_name, last_name, designation, department)
         `)
-        .eq("project_id", projectId);
+        .eq("project_id", projectId)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error("Project assignments fetch error:", error);
@@ -58,6 +58,11 @@ export const useProjectAssignments = (projectId?: string) => {
         throw new Error("This employee is already assigned to this project");
       }
       
+      // Ensure end_date is provided as per schema requirement
+      if (!assignment.end_date) {
+        throw new Error("End date is required for project assignments");
+      }
+
       const { data, error } = await supabase
         .from("project_assignments")
         .insert(assignment)
@@ -84,6 +89,11 @@ export const useProjectAssignments = (projectId?: string) => {
 
   const updateAssignment = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ProjectAssignment> }) => {
+      // Ensure end_date is provided if it's being updated
+      if ('end_date' in data && !data.end_date) {
+        throw new Error("End date is required for project assignments");
+      }
+
       const { error } = await supabase
         .from("project_assignments")
         .update(data)
@@ -107,6 +117,7 @@ export const useProjectAssignments = (projectId?: string) => {
 
   const removeAssignment = useMutation({
     mutationFn: async (assignmentId: string) => {
+      // Instead of deleting, we update the status to COMPLETED as per schema
       const { error } = await supabase
         .from("project_assignments")
         .update({ status: "COMPLETED" })
