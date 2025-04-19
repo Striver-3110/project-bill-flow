@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Calendar as CalendarIcon, Briefcase } from "lucide-react";
 import { format } from "date-fns";
@@ -29,6 +30,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FormData {
   project_name: string;
@@ -39,8 +48,15 @@ interface FormData {
   budget: number;
 }
 
+interface Client {
+  id: string;
+  client_name: string;
+}
+
 export function NewProjectDialog() {
   const [open, setOpen] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(false);
   const { createProject } = useProjects();
   const { toast } = useToast();
   
@@ -55,8 +71,50 @@ export function NewProjectDialog() {
     }
   });
 
+  // Fetch clients when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchClients();
+    }
+  }, [open]);
+
+  const fetchClients = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, client_name")
+        .order("client_name");
+        
+      if (error) {
+        throw error;
+      }
+      
+      setClients(data || []);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load clients",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
+      // Validate client selection
+      if (!data.client_id) {
+        toast({
+          title: "Error",
+          description: "Please select a client",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Validate start and end dates
       if (!data.start_date || !data.end_date) {
         toast({
@@ -80,7 +138,7 @@ export function NewProjectDialog() {
       await createProject.mutateAsync({
         project_name: data.project_name,
         description: data.description,
-        client_id: data.client_id || "00000000-0000-0000-0000-000000000000", // Providing default client_id as it's required
+        client_id: data.client_id,
         start_date: data.start_date.toISOString(),
         end_date: data.end_date.toISOString(),
         budget: data.budget,
@@ -143,6 +201,45 @@ export function NewProjectDialog() {
                   <FormControl>
                     <Input {...field} placeholder="Enter project description" />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="client_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Client</FormLabel>
+                  <FormControl>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={loading || clients.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.client_name}
+                          </SelectItem>
+                        ))}
+                        {clients.length === 0 && (
+                          <SelectItem value="no-clients" disabled>
+                            {loading ? "Loading..." : "No clients available"}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  {clients.length === 0 && !loading && (
+                    <p className="text-sm text-muted-foreground">
+                      Please add a client first from the Clients page
+                    </p>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
