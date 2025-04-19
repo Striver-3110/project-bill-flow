@@ -15,6 +15,7 @@ import { ProjectFinancials } from "@/components/projects/ProjectFinancials";
 import { TimeEntriesTable } from "@/components/projects/TimeEntriesTable";
 import { useTimeEntryMutations } from "@/hooks/use-time-entry-mutations";
 import { useEmployees } from "@/hooks/use-employees";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ProjectsDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,7 +26,8 @@ const ProjectsDashboard = () => {
     timeEntries,
     isLoadingProjects, 
     deleteProject,
-    getMonthlyTimeData
+    getMonthlyTimeData,
+    queryClient
   } = useProjects();
   const { deleteTimeEntry } = useTimeEntryMutations();
   const { employees } = useEmployees();
@@ -149,6 +151,11 @@ const ProjectsDashboard = () => {
     setEditingTimeEntry(timeEntry);
   };
 
+  const handleProjectUpdated = (updatedProject: Project) => {
+    queryClient.invalidateQueries({ queryKey: ["projects"] });
+    toast.success("Project updated successfully");
+  };
+
   if (isLoadingProjects) {
     return (
       <div className="flex items-center justify-center h-[70vh]">
@@ -198,6 +205,7 @@ const ProjectsDashboard = () => {
                 projects={filteredProjects}
                 projectStats={projectStats}
                 handleDeleteProject={handleDeleteProject}
+                handleProjectUpdated={handleProjectUpdated}
               />
             </CardContent>
           </Card>

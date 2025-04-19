@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import type { Project } from "@/types";
 
 const projectSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
@@ -23,16 +23,8 @@ const projectSchema = z.object({
 type ProjectFormValues = z.infer<typeof projectSchema>;
 
 interface EditProjectDialogProps {
-  project: {
-    project_id: string;
-    project_name: string;
-    description?: string;
-    start_date: string;
-    end_date: string;
-    budget: number;
-    status: "ACTIVE" | "COMPLETED" | "ON_HOLD";
-  };
-  onProjectUpdated: () => void;
+  project: Project;
+  onProjectUpdated: (project: Project) => void;
   trigger?: React.ReactNode;
 }
 
@@ -44,16 +36,16 @@ export function EditProjectDialog({ project, onProjectUpdated, trigger }: EditPr
     defaultValues: {
       project_name: project.project_name,
       description: project.description || "",
-      start_date: format(new Date(project.start_date), "yyyy-MM-dd"),
-      end_date: format(new Date(project.end_date), "yyyy-MM-dd"),
+      start_date: project.start_date.split('T')[0],
+      end_date: project.end_date.split('T')[0],
       budget: project.budget.toString(),
-      status: project.status
+      status: project.status as "ACTIVE" | "COMPLETED" | "ON_HOLD"
     },
   });
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      const { error } = await supabase
+      const { data: updatedProject, error } = await supabase
         .from('projects')
         .update({
           project_name: data.project_name,
@@ -63,13 +55,15 @@ export function EditProjectDialog({ project, onProjectUpdated, trigger }: EditPr
           budget: data.budget,
           status: data.status
         })
-        .eq('project_id', project.project_id);
+        .eq('project_id', project.project_id)
+        .select()
+        .single();
 
       if (error) throw error;
 
       toast.success("Project updated successfully");
       setOpen(false);
-      onProjectUpdated();
+      onProjectUpdated(updatedProject as Project);
     } catch (error) {
       console.error("Error updating project:", error);
       toast.error("Failed to update project");
