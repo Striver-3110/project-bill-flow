@@ -28,7 +28,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               </div>
             </div>
             <div className="font-medium text-lg flex items-center">
-              <span className="text-gray-500 mb-1 text-sm">Powered by</span>
+              <span className="text-gray-500 text-sm">Powered by</span>
               <img 
                   src="https://i.ibb.co/Z6nDP1Fx/top.png" 
                   alt="Incubyte Logo" 
