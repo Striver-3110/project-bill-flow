@@ -1,7 +1,7 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  BarChart, 
+  BarChart as BarChartIcon, 
   FileText, 
   DollarSign, 
   Clock, 
@@ -13,6 +13,23 @@ import StatsCard from "@/components/ui/stats-card";
 import StatusBadge from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
 import { dashboardStats, invoices } from "@/data/mockData";
+import { useProjects } from "@/hooks/use-projects";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend } from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line
+} from "recharts";
 
 // Helper function to ensure status is of the correct type
 const getValidStatus = (status: string): "draft" | "pending" | "sent" | "paid" | "overdue" | "active" | "inactive" | "completed" | "on-hold" => {
@@ -41,17 +58,90 @@ const getValidStatus = (status: string): "draft" | "pending" | "sent" | "paid" |
   }
 };
 
+// Revenue data for the monthly chart
+const revenueData = [
+  { month: 'Jan', revenue: 12500 },
+  { month: 'Feb', revenue: 18200 },
+  { month: 'Mar', revenue: 22800 },
+  { month: 'Apr', revenue: 19500 },
+  { month: 'May', revenue: 24700 },
+  { month: 'Jun', revenue: 32000 },
+];
+
+// Project status data for pie chart
+const projectStatusData = [
+  { name: 'Active', value: 12, color: '#3B82F6' },
+  { name: 'Completed', value: 8, color: '#10B981' },
+  { name: 'On Hold', value: 4, color: '#F59E0B' },
+];
+
+// Time tracking data for line chart
+const timeTrackingData = [
+  { week: 'Week 1', billable: 180, nonBillable: 20 },
+  { week: 'Week 2', billable: 200, nonBillable: 30 },
+  { week: 'Week 3', billable: 220, nonBillable: 25 },
+  { week: 'Week 4', billable: 190, nonBillable: 15 },
+];
+
 const Dashboard = () => {
+  const { projects, projectStats, isLoadingProjects } = useProjects();
+  const [timeFrame, setTimeFrame] = useState('6months');
+
+  // Filter project data
+  const activeProjects = projects?.filter(p => p.status === 'ACTIVE') || [];
+  const completedProjects = projects?.filter(p => p.status === 'COMPLETED') || [];
+  const onHoldProjects = projects?.filter(p => p.status === 'ON_HOLD') || [];
+
+  // Calculate project statistics
+  const totalProjects = projects?.length || 0;
+  const totalBudget = projects?.reduce((sum, p) => sum + (p.budget || 0), 0) || 0;
+  const totalHours = projectStats?.reduce((sum, p) => sum + (p.total_hours || 0), 0) || 0;
+
+  // Custom color scheme for charts
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-billflow-gray-900">Dashboard</h1>
         <p className="text-billflow-gray-500 mt-1">
-          Overview of your billing and invoice status
+          Overview of your projects, invoices and financial performance
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Project Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatsCard
+          title="Total Projects"
+          value={totalProjects}
+          icon={FileText}
+          variant="primary"
+          trend={8}
+        />
+        <StatsCard
+          title="Active Projects"
+          value={activeProjects.length}
+          icon={TrendingUp}
+          variant="success"
+          trend={12}
+        />
+        <StatsCard
+          title="Total Budget"
+          value={formatCurrency(totalBudget)}
+          icon={DollarSign}
+          variant="warning"
+          trend={5}
+        />
+        <StatsCard
+          title="Total Hours"
+          value={`${totalHours.toLocaleString()} hrs`}
+          icon={Clock}
+          variant="danger"
+          trend={3}
+        />
+      </div>
+
+      {/* Invoice Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Invoiced"
@@ -83,6 +173,74 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Monthly Revenue Chart */}
+        <Card className="p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-billflow-gray-900">Monthly Revenue</h2>
+            <select 
+              className="text-sm border border-billflow-gray-200 rounded-md px-2 py-1"
+              value={timeFrame}
+              onChange={(e) => setTimeFrame(e.target.value)}
+            >
+              <option value="6months">Last 6 Months</option>
+              <option value="year">This Year</option>
+              <option value="lastyear">Last Year</option>
+            </select>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis 
+                  tickFormatter={(value) => `$${value / 1000}k`}
+                />
+                <Tooltip 
+                  formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']}
+                />
+                <Legend />
+                <Bar dataKey="revenue" fill="#3B82F6" name="Revenue" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Project Status Distribution */}
+        <Card className="p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-billflow-gray-900">Project Status Distribution</h2>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Active', value: activeProjects.length, color: '#3B82F6' },
+                    { name: 'Completed', value: completedProjects.length, color: '#10B981' },
+                    { name: 'On Hold', value: onHoldProjects.length, color: '#F59E0B' },
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {projectStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [value, 'Projects']} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Invoices */}
         <Card className="p-5">
           <div className="flex justify-between items-center mb-4">
@@ -109,50 +267,50 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Top Clients */}
+        {/* Time Tracking */}
         <Card className="p-5">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-billflow-gray-900">Top Clients</h2>
-            <a href="/clients" className="text-sm text-billflow-blue-600 hover:text-billflow-blue-800 font-medium">
-              View all
-            </a>
+            <h2 className="text-lg font-semibold text-billflow-gray-900">Weekly Time Tracking</h2>
           </div>
-          <div className="space-y-4">
-            {dashboardStats.topClients.map(({ client, totalBilled }) => (
-              <div key={client.client_id} className="flex items-center justify-between border-b border-billflow-gray-100 pb-4 last:border-0">
-                <div>
-                  <p className="font-medium text-billflow-gray-900">{client.client_name}</p>
-                  <p className="text-sm text-billflow-gray-500">{client.contact_person}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-billflow-gray-900">
-                    {formatCurrency(totalBilled)}
-                  </p>
-                  <StatusBadge status={getValidStatus(client.status || 'active')} className="mt-1" />
-                </div>
-              </div>
-            ))}
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={timeTrackingData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="week" />
+                <YAxis tickFormatter={(value) => `${value} hrs`} />
+                <Tooltip formatter={(value) => [`${value} hours`, '']} />
+                <Legend />
+                <Line type="monotone" dataKey="billable" stroke="#3B82F6" name="Billable Hours" />
+                <Line type="monotone" dataKey="nonBillable" stroke="#F59E0B" name="Non-Billable" />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       </div>
 
-      {/* Monthly Revenue Chart */}
+      {/* Top Clients */}
       <Card className="p-5">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-billflow-gray-900">Monthly Revenue</h2>
-          <div className="flex space-x-2">
-            <select className="text-sm border border-billflow-gray-200 rounded-md px-2 py-1">
-              <option>Last 6 Months</option>
-              <option>This Year</option>
-              <option>Last Year</option>
-            </select>
-          </div>
+          <h2 className="text-lg font-semibold text-billflow-gray-900">Top Clients</h2>
+          <a href="/clients" className="text-sm text-billflow-blue-600 hover:text-billflow-blue-800 font-medium">
+            View all
+          </a>
         </div>
-        <div className="h-64 w-full flex items-center justify-center bg-billflow-gray-50 rounded-lg border border-billflow-gray-200">
-          <div className="flex flex-col items-center text-billflow-gray-500">
-            <BarChart className="h-10 w-10 mb-2" />
-            <p>Chart visualization will appear here</p>
-          </div>
+        <div className="space-y-4">
+          {dashboardStats.topClients.map(({ client, totalBilled }) => (
+            <div key={client.client_id} className="flex items-center justify-between border-b border-billflow-gray-100 pb-4 last:border-0">
+              <div>
+                <p className="font-medium text-billflow-gray-900">{client.client_name}</p>
+                <p className="text-sm text-billflow-gray-500">{client.contact_person}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium text-billflow-gray-900">
+                  {formatCurrency(totalBilled)}
+                </p>
+                <StatusBadge status={getValidStatus(client.status || 'active')} className="mt-1" />
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
 
