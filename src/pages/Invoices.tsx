@@ -1,11 +1,12 @@
+
 import React, { useState } from "react";
 import { 
   Search, 
-  Download, 
-  Mail, 
   Eye,
   Edit,
   Trash,
+  Mail,
+  Download,
   Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,12 @@ import { CreateInvoiceSheet } from "@/components/invoices/CreateInvoiceSheet";
 import { InvoiceStats } from "@/components/invoices/InvoiceStats";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
-import { viewInvoice, mailInvoice, downloadInvoice, printInvoice } from "@/utils/invoiceActions";
 import { Invoice } from "@/types";
 import { EditInvoiceDialog } from "@/components/invoices/EditInvoiceDialog";
+import { ViewInvoiceDialog } from "@/components/invoices/ViewInvoiceDialog";
+import { MailInvoiceDialog } from "@/components/invoices/MailInvoiceDialog";
+import { DownloadInvoiceDialog } from "@/components/invoices/DownloadInvoiceDialog";
+import { PrintInvoiceDialog } from "@/components/invoices/PrintInvoiceDialog";
 
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -185,14 +189,18 @@ const Invoices = () => {
                         <StatusBadge status={getValidStatus(invoice.status)} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-billflow-blue-600 mr-1"
-                          onClick={() => viewInvoice(invoice)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <ViewInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-blue-600 mr-1"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                         
                         <EditInvoiceDialog 
                           invoice={invoice} 
@@ -208,30 +216,45 @@ const Invoices = () => {
                           }
                         />
                         
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-billflow-gray-600 mr-1"
-                          onClick={() => mailInvoice(invoice)}
-                        >
-                          <Mail className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-billflow-gray-600 mr-1"
-                          onClick={() => downloadInvoice(invoice)}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-billflow-gray-600 mr-1"
-                          onClick={() => printInvoice(invoice)}
-                        >
-                          <Printer className="h-4 w-4" />
-                        </Button>
+                        <MailInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-gray-600 mr-1"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <DownloadInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-gray-600 mr-1"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
+                        <PrintInvoiceDialog 
+                          invoice={invoice}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-billflow-gray-600 mr-1"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        
                         <Button 
                           variant="ghost" 
                           size="sm" 

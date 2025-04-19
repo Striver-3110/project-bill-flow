@@ -3,6 +3,9 @@ import { Invoice } from "@/types";
 import { saveAs } from "file-saver";
 import { toast } from "sonner";
 
+// These functions are kept for backward compatibility
+// but they're not used in the new dialog-based approach
+
 export const viewInvoice = (invoice: Invoice) => {
   // For now, we'll just open a new window with invoice details
   window.open(`/invoices/${invoice.invoice_id || invoice.id}`, '_blank');
