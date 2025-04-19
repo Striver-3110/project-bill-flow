@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Menu } from 'lucide-react';
 
@@ -19,16 +18,25 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <span className="sr-only">Toggle Menu</span>
           </button>
           
-          <div className="flex items-center gap-2 hidden lg:flex">
-            <img 
-              src="https://i.ibb.co/5WZ6TnXH/bottom.png" 
-              alt="bottom" 
-            /> 
-            <img 
-              src="https://i.ibb.co/Y7zsMT1h/top.png" 
-              alt="top" 
-              className="w-[120px] h-auto"
-            />
+          {/* Desktop logo and text */}
+          <div className="hidden lg:flex items-center gap-3">
+            <div className="flex items-center">
+              {/* Logo container with proper sizing */}
+              <div className="relative h-10 w-32 flex items-center">
+                {/* Bottom logo image */}
+                <img 
+                  src="/api/placeholder/120/40" 
+                  alt="Bottom logo" 
+                  className="object-contain h-8 w-auto"
+                /> 
+                {/* Top logo image */}
+                <img 
+                  src="/api/placeholder/120/40" 
+                  alt="Top logo" 
+                  className="object-contain h-8 w-auto absolute top-1/2 transform -translate-y-1/2 left-0"
+                />
+              </div>
+            </div>
             <div className="font-medium text-lg flex items-center">
               <span className="text-gray-500">Powered by</span>
               <span className="text-primary font-bold ml-1">Incubyte</span>
@@ -36,9 +44,19 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           </div>
           
           {/* Mobile logo and text */}
-          <div className="lg:hidden flex items-center gap-1">
-            <span className="text-sm text-gray-500">Powered by</span>
-            <span className="text-primary font-bold text-sm">Incubyte</span>
+          <div className="lg:hidden flex items-center gap-2">
+            {/* Mobile logo - simplified version */}
+            <div className="relative h-8 w-8">
+              <img 
+                src="/api/placeholder/32/32" 
+                alt="Mobile logo" 
+                className="object-contain h-full w-full"
+              />
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm text-gray-500">Powered by</span>
+              <span className="text-primary font-bold text-sm ml-1">Incubyte</span>
+            </div>
           </div>
         </div>
       </div>
