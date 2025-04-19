@@ -20,14 +20,15 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           
           {/* Desktop logo and text */}
           <div className="hidden lg:flex items-center gap-3">
-            <img 
-              src="https://i.ibb.co/Z6nDP1Fx/top.png" 
-              alt="Incubyte Logo" 
-              className="h-8 w-auto" 
-            />
+            
             <div className="flex items-center">
               <span className="text-gray-500 text-sm">Powered by</span>
-              <span className="text-primary font-semibold ml-1 text-sm">Incubyte</span>
+              <img 
+                src="https://i.ibb.co/Z6nDP1Fx/top.png" 
+                alt="Incubyte Logo" 
+                className="h-10 w-auto" 
+              />
+              {/* <span className="text-primary font-semibold ml-1 text-sm">Incubyte</span> */}
             </div>
           </div>
           
