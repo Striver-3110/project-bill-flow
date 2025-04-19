@@ -1,41 +1,27 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, UserMinus, UserPlus } from "lucide-react";
 import { ProjectAssignmentDialog } from "./ProjectAssignmentDialog";
 import { useProjectAssignments } from "@/hooks/use-project-assignments";
 import { format } from "date-fns";
-
 interface ProjectTeamProps {
   projectId: string;
   projectName: string;
 }
-
-export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
-  const { projectAssignments, isLoading, removeAssignment } = useProjectAssignments(projectId);
+export function ProjectTeam({
+  projectId,
+  projectName
+}: ProjectTeamProps) {
+  const {
+    projectAssignments,
+    isLoading,
+    removeAssignment
+  } = useProjectAssignments(projectId);
   const [removingId, setRemovingId] = useState<string | null>(null);
-
   const handleRemoveAssignment = async (assignmentId: string) => {
     try {
       setRemovingId(assignmentId);
@@ -44,22 +30,16 @@ export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
       setRemovingId(null);
     }
   };
-
   if (isLoading) {
-    return (
-      <div className="flex justify-center p-8">
+    return <div className="flex justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
   const activeAssignments = projectAssignments?.filter(a => a.status === "ACTIVE") || [];
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Project Team</CardTitle>
+          <CardTitle className="mx-0 px-0 my-0 py-0">Project Team</CardTitle>
           <CardDescription>
             Team members assigned to this project
           </CardDescription>
@@ -72,13 +52,10 @@ export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
         </ProjectAssignmentDialog>
       </CardHeader>
       <CardContent>
-        {activeAssignments.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+        {activeAssignments.length === 0 ? <div className="text-center py-8 text-muted-foreground">
             <p>No team members assigned to this project yet.</p>
             <p className="text-sm mt-2">Use the "Assign Employee" button to add team members.</p>
-          </div>
-        ) : (
-          <Table>
+          </div> : <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Employee</TableHead>
@@ -90,8 +67,7 @@ export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {activeAssignments.map((assignment) => (
-                <TableRow key={assignment.assignment_id}>
+              {activeAssignments.map(assignment => <TableRow key={assignment.assignment_id}>
                   <TableCell className="font-medium">
                     {assignment.employee?.first_name} {assignment.employee?.last_name}
                   </TableCell>
@@ -106,23 +82,15 @@ export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {assignment.end_date ? (
-                      <div className="flex items-center">
+                    {assignment.end_date ? <div className="flex items-center">
                         <Calendar className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                         {format(new Date(assignment.end_date), "dd MMM yyyy")}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">No end date</span>
-                    )}
+                      </div> : <span className="text-muted-foreground">No end date</span>}
                   </TableCell>
                   <TableCell className="text-right">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                        >
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
                           <UserMinus className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -135,30 +103,19 @@ export function ProjectTeam({ projectId, projectName }: ProjectTeamProps) {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleRemoveAssignment(assignment.assignment_id!)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            disabled={removingId === assignment.assignment_id}
-                          >
-                            {removingId === assignment.assignment_id ? (
-                              <>
+                          <AlertDialogAction onClick={() => handleRemoveAssignment(assignment.assignment_id!)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={removingId === assignment.assignment_id}>
+                            {removingId === assignment.assignment_id ? <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current mr-2"></div>
                                 Removing...
-                              </>
-                            ) : (
-                              "Remove"
-                            )}
+                              </> : "Remove"}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
                   </TableCell>
-                </TableRow>
-              ))}
+                </TableRow>)}
             </TableBody>
-          </Table>
-        )}
+          </Table>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
