@@ -24,16 +24,16 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               {/* Logo container with proper sizing */}
               <div className="relative h-10 w-32 flex items-center">
                 {/* Bottom logo image */}
-                <img 
-                  src="https://i.ibb.co/Z6nDP1Fx/top.png" 
-                  alt="Incubyte Logo" 
-                  className="h-10 w-auto mr-1" 
-                />
+                
               </div>
             </div>
             <div className="font-medium text-lg flex items-center">
-              <span className="text-gray-500">Powered by</span>
-              <span className="text-primary font-bold ml-1">Incubyte</span>
+              <span className="text-gray-500 mb-1">Powered by</span>
+              <img 
+                  src="https://i.ibb.co/Z6nDP1Fx/top.png" 
+                  alt="Incubyte Logo" 
+                  className="h-10 w-auto mr-1" 
+              />
             </div>
           </div>
           
