@@ -3,7 +3,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -85,7 +85,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Personal Information Section */}
         <div className="space-y-4">
           <h3 className="text-md font-medium text-gray-700">Personal Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -157,7 +156,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           </div>
         </div>
 
-        {/* Employment Information Section - For Admin & HR */}
         <div className="space-y-4">
           <h3 className="text-md font-medium text-gray-700">Employment Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -232,7 +230,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           </div>
         </div>
 
-        {/* Financial Information Section - For Finance Perspective */}
         <div className="space-y-4">
           <h3 className="text-md font-medium text-gray-700">Financial Information</h3>
           <FormField
@@ -255,11 +252,19 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
             type="button"
             variant="outline"
             onClick={onCancel}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : mode === "create" ? "Create Employee" : "Update Employee"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {mode === "create" ? "Creating..." : "Updating..."}
+              </>
+            ) : (
+              mode === "create" ? "Create Employee" : "Update Employee"
+            )}
           </Button>
         </div>
       </form>

@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Calendar as CalendarIcon, Briefcase } from "lucide-react";
+import { Calendar as CalendarIcon, Briefcase, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/hooks/use-projects";
@@ -71,7 +70,6 @@ export function NewProjectDialog() {
     }
   });
 
-  // Fetch clients when dialog opens
   useEffect(() => {
     if (open) {
       fetchClients();
@@ -105,7 +103,6 @@ export function NewProjectDialog() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // Validate client selection
       if (!data.client_id) {
         toast({
           title: "Error",
@@ -115,7 +112,6 @@ export function NewProjectDialog() {
         return;
       }
       
-      // Validate start and end dates
       if (!data.start_date || !data.end_date) {
         toast({
           title: "Error",
@@ -125,7 +121,6 @@ export function NewProjectDialog() {
         return;
       }
       
-      // Ensure end date is after start date
       if (data.end_date <= data.start_date) {
         toast({
           title: "Error",
@@ -135,6 +130,7 @@ export function NewProjectDialog() {
         return;
       }
 
+      setLoading(true);
       await createProject.mutateAsync({
         project_name: data.project_name,
         description: data.description,
@@ -158,6 +154,8 @@ export function NewProjectDialog() {
         description: "Failed to create project. Please check your inputs and try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -347,10 +345,19 @@ export function NewProjectDialog() {
             </div>
 
             <div className="flex justify-end gap-4 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
                 Cancel
               </Button>
-              <Button type="submit">Create Project</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Project'
+                )}
+              </Button>
             </div>
           </form>
         </Form>

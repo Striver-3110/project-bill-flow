@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/hooks/use-projects";
@@ -52,6 +51,7 @@ interface FormData {
 
 export function TimeEntryDialog() {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { projects, addTimeEntry } = useProjects();
   const { employees } = useEmployees();
   
@@ -88,6 +88,7 @@ export function TimeEntryDialog() {
         return;
       }
 
+      setIsSubmitting(true);
       await addTimeEntry.mutateAsync({
         project_id: data.project_id,
         employee_id: data.employee_id,
@@ -103,6 +104,8 @@ export function TimeEntryDialog() {
     } catch (error) {
       console.error("Time entry error:", error);
       toast.error("Failed to add time entry");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -277,10 +280,24 @@ export function TimeEntryDialog() {
             />
 
             <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button type="submit">Save Time Entry</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Time Entry'
+                )}
+              </Button>
             </div>
           </form>
         </Form>
