@@ -42,7 +42,7 @@ export function EditProjectDialog({ project, onProjectUpdated, trigger }: EditPr
       start_date: project.start_date.split('T')[0],
       end_date: project.end_date?.split('T')[0] || "",
       budget: Number(project.budget), // Convert to number here
-      status: project.status as "ACTIVE" | "COMPLETED" | "ON_HOLD"
+      status: project.status.toUpperCase() as "ACTIVE" | "COMPLETED" | "ON_HOLD"
     },
   });
 
@@ -71,12 +71,23 @@ export function EditProjectDialog({ project, onProjectUpdated, trigger }: EditPr
       const convertedProject: Project = {
         ...updatedProject,
         name: updatedProject.project_name, // Ensure the name is set for backward compatibility
+        status: mapDatabaseStatusToProjectStatus(updatedProject.status), // Convert status to lowercase format
       } as Project;
       
       onProjectUpdated(convertedProject);
     } catch (error) {
       console.error("Error updating project:", error);
       toast.error("Failed to update project");
+    }
+  };
+
+  // Helper function to map database status to Project type status
+  const mapDatabaseStatusToProjectStatus = (dbStatus: "ACTIVE" | "COMPLETED" | "ON_HOLD"): "active" | "inactive" | "completed" | "on-hold" => {
+    switch (dbStatus) {
+      case "ACTIVE": return "active";
+      case "COMPLETED": return "completed";
+      case "ON_HOLD": return "on-hold";
+      default: return "inactive"; // Fallback
     }
   };
 
