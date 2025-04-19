@@ -11,6 +11,46 @@ import { DeleteClientDialog } from "@/components/clients/DeleteClientDialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Client } from "@/types";
+
+type SupabaseClient = {
+  id: string;
+  client_name: string;
+  contact_person: string;
+  contact_email: string;
+  contact_phone: string | null;
+  address: string | null;
+  payment_terms: string | null;
+  contract_start_date: string;
+  contract_end_date: string | null;
+  status: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+const mapSupabaseClientToClient = (client: SupabaseClient): Client => {
+  return {
+    id: client.id,
+    client_id: client.id,
+    name: client.client_name,
+    client_name: client.client_name,
+    email: client.contact_email,
+    contact_email: client.contact_email,
+    phone: client.contact_phone || "",
+    contact_phone: client.contact_phone || "",
+    address: client.address || "",
+    city: "",
+    state: "",
+    zip: "",
+    contact_person: client.contact_person,
+    contract_start_date: client.contract_start_date,
+    contract_end_date: client.contract_end_date || "",
+    payment_terms: client.payment_terms || "",
+    status: client.status || "active",
+    created_at: client.created_at || "",
+    updated_at: client.updated_at || ""
+  };
+};
 
 const Clients = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,33 +65,17 @@ const Clients = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      return data.map(mapSupabaseClientToClient);
     }
   });
-
-  const deleteClient = async (clientId: string) => {
-    try {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId);
-
-      if (error) throw error;
-      toast.success("Client deleted successfully");
-      
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-    } catch (error) {
-      toast.error("Error deleting client");
-      console.error("Error deleting client:", error);
-    }
-  };
 
   const handleClientUpdated = () => {
     queryClient.invalidateQueries({ queryKey: ['clients'] });
   };
 
   const filteredClients = clients?.filter(client =>
-    client.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.contact_person.toLowerCase().includes(searchQuery.toLowerCase())
   ) ?? [];
 
@@ -143,7 +167,7 @@ const Clients = () => {
                         <Building className="h-5 w-5 text-billflow-blue-600" />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-billflow-gray-900">{client.client_name}</div>
+                        <div className="text-sm font-medium text-billflow-gray-900">{client.name}</div>
                         <div className="text-sm text-billflow-gray-500 flex items-center">
                           <Building className="h-3 w-3 mr-1" />
                           {client.address?.split(',')[0] || 'No address'}
@@ -155,11 +179,11 @@ const Clients = () => {
                     <div className="text-sm text-billflow-gray-900">{client.contact_person}</div>
                     <div className="text-sm text-billflow-gray-500 flex items-center">
                       <Mail className="h-3 w-3 mr-1" />
-                      {client.contact_email}
+                      {client.email}
                     </div>
                     <div className="text-sm text-billflow-gray-500 flex items-center">
                       <Phone className="h-3 w-3 mr-1" />
-                      {client.contact_phone || 'No phone'}
+                      {client.phone || 'No phone'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -190,7 +214,7 @@ const Clients = () => {
                     />
                     <DeleteClientDialog
                       clientId={client.id}
-                      clientName={client.client_name}
+                      clientName={client.name}
                       onClientDeleted={handleClientUpdated}
                       trigger={
                         <Button variant="ghost" size="sm" className="text-billflow-gray-600">

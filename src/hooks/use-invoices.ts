@@ -34,22 +34,35 @@ export type ClientProjectData = {
     project_id: string;
     project_name: string;
     status: string;
+    project_totals?: {
+      totalHours: number;
+      billableHours: number;
+      totalAmount: number;
+    };
     employees: {
       employee_id: string;
       full_name: string;
       department: string;
       role: string;
+      designation?: string; // Added to match the data structure
       time_entries: {
         hours: number;
         billable: boolean;
         date: string;
         description: string;
+        amount?: number; // Added to match the data structure
       }[];
       total_hours: number;
+      billable_hours?: number; // Added to match the data structure
+      non_billable_hours?: number; // Added to match the data structure
       total_billable_amount: number;
       cost_rate: number;
     }[];
   }[];
+  // Add the following properties
+  total_billable_amount?: number;
+  total_hours?: number;
+  total_billable_hours?: number;
 };
 
 export function useInvoices() {

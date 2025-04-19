@@ -48,10 +48,10 @@ export function EditClientDialog({ client, onClientUpdated, trigger }: EditClien
   const form = useForm({
     resolver: zodResolver(clientSchema),
     defaultValues: {
-      client_name: client.client_name || "",
+      client_name: client.client_name || client.name || "",
       contact_person: client.contact_person || "",
-      contact_email: client.contact_email || "",
-      contact_phone: client.contact_phone || "",
+      contact_email: client.contact_email || client.email || "",
+      contact_phone: client.contact_phone || client.phone || "",
       address: client.address || "",
       payment_terms: client.payment_terms || "",
       contract_start_date: client.contract_start_date || "",
