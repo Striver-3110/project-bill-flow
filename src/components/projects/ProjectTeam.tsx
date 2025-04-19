@@ -39,7 +39,7 @@ export function ProjectTeam({
   return <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="mx-0 px-0 my-0 py-0">Project Team</CardTitle>
+          <CardTitle className="px-0 my-0 py-0 mx-0">Project Team</CardTitle>
           <CardDescription>
             Team members assigned to this project
           </CardDescription>
