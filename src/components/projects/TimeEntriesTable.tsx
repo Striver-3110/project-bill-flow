@@ -48,7 +48,7 @@ export const TimeEntriesTable = ({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="border rounded-md overflow-auto">
       <Table>
         <TableHeader>
           <TableRow>

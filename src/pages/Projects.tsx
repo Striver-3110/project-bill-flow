@@ -158,7 +158,7 @@ const ProjectsDashboard = () => {
   }
 
   return (
-    <div className="space-y-6 overflow-y-auto scrollbar-none">
+    <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Projects Dashboard</h1>
         <div className="flex items-center gap-2">

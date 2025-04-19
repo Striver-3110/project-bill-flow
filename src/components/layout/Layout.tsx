@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "./Sidebar";
@@ -13,13 +14,13 @@ const Layout: React.FC<LayoutProps> = ({
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
   };
-  return <div className="flex h-screen bg-gray-50">
+  return <div className="flex min-h-screen bg-gray-50">
       <Sidebar isMobile={isMobile} isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
         
-        <main className="flex-1 bg-billflow-gray-50 h-dvh p-4 md:p-6">
+        <main className="flex-1 bg-billflow-gray-50 p-4 md:p-6">
           {children}
         </main>
       </div>
