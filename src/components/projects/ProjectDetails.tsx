@@ -46,27 +46,6 @@ export function ProjectDetails() {
     enabled: !!projectId,
   });
 
-  const { data: projectStats } = useQuery({
-    queryKey: ['project-stats', projectId],
-    queryFn: async () => {
-      if (!projectId) return null;
-      
-      const { data, error } = await supabase
-        .from("project_statistics")
-        .select("*")
-        .eq("project_id", projectId)
-        .single();
-
-      if (error) {
-        console.error("Project stats fetch error:", error);
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: !!projectId,
-  });
-
   const projectTimeEntries = getProjectTimeEntries(projectId || '');
 
   const handleDeleteTimeEntry = async (timeEntryId: string) => {
@@ -156,46 +135,6 @@ export function ProjectDetails() {
           </CardContent>
         </Card>
       </div>
-
-      {projectStats && (
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold">{projectStats.progress_percentage || 0}%</span>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div 
-                    className="bg-primary h-2.5 rounded-full" 
-                    style={{ width: `${projectStats.progress_percentage || 0}%` }}
-                  ></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Team Size</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projectStats.team_size || 0} members</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Hours Logged</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <BarChart3 className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-2xl font-bold">{projectStats.total_hours || 0} hours</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <div className="space-y-6">
         <ProjectTeam projectId={project.project_id} projectName={project.project_name} />
