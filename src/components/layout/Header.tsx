@@ -20,13 +20,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           
           {/* Desktop logo and text */}
           <div className="hidden lg:flex items-center gap-3">
-            <div className="flex items-center">
-              {/* Logo container with proper sizing */}
-              <div className="relative h-10 w-32 flex items-center">
-                {/* Bottom logo image */}
-                
-              </div>
-            </div>
             <div className="font-medium text-lg flex items-center">
               <span className="text-gray-500 text-sm">Powered by</span>
               <img 
