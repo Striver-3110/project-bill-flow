@@ -59,6 +59,7 @@ export function NewProjectDialog() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      // Validate start and end dates
       if (!data.start_date || !data.end_date) {
         toast({
           title: "Error",
@@ -68,6 +69,16 @@ export function NewProjectDialog() {
         return;
       }
       
+      // Ensure end date is after start date
+      if (data.end_date <= data.start_date) {
+        toast({
+          title: "Error",
+          description: "End date must be after start date",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await createProject.mutateAsync({
         project_name: data.project_name,
         description: data.description,
@@ -88,7 +99,7 @@ export function NewProjectDialog() {
       console.error("Project creation error:", error);
       toast({
         title: "Error",
-        description: "Failed to create project. Please check your permissions.",
+        description: "Failed to create project. Please check your inputs and try again.",
         variant: "destructive",
       });
     }
