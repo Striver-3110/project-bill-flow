@@ -1,11 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input"; // Add this import
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -21,8 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { Employee } from "@/types";
 import { CreateEmployeeInput, UpdateEmployeeInput } from "@/hooks/use-employees";
+import { useDepartments } from "@/hooks/use-departments";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   first_name: z.string().min(2, "First name must be at least 2 characters"),
@@ -56,6 +65,10 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   mode,
   onCancel,
 }) => {
+  const { departments, isLoading: isLoadingDepartments } = useDepartments();
+  const [openDepartmentCombobox, setOpenDepartmentCombobox] = useState(false);
+  const [departmentInputValue, setDepartmentInputValue] = useState("");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,6 +96,14 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       onSubmit(values as CreateEmployeeInput);
     }
   };
+
+  // Create a list of all departments - existing ones plus the current input value
+  const departmentOptions = departmentInputValue 
+    ? [...departments, departmentInputValue]
+    : departments;
+
+  // Remove duplicates
+  const uniqueDepartmentOptions = [...new Set(departmentOptions)].sort();
 
   return (
     <Form {...form}>
@@ -222,9 +243,82 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Department</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Engineering" {...field} />
-                  </FormControl>
+                  <Popover open={openDepartmentCombobox} onOpenChange={setOpenDepartmentCombobox}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openDepartmentCombobox}
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value || "Select department..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput 
+                          placeholder="Search or add department..." 
+                          value={departmentInputValue}
+                          onValueChange={setDepartmentInputValue}
+                        />
+                        {isLoadingDepartments ? (
+                          <div className="py-6 text-center">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                            <p className="text-sm text-muted-foreground mt-2">Loading departments...</p>
+                          </div>
+                        ) : (
+                          <>
+                            <CommandEmpty>
+                              {departmentInputValue ? (
+                                <div className="py-3 px-2">
+                                  <p>Department not found.</p>
+                                  <Button 
+                                    variant="outline" 
+                                    className="mt-2 w-full"
+                                    onClick={() => {
+                                      field.onChange(departmentInputValue);
+                                      setOpenDepartmentCombobox(false);
+                                    }}
+                                  >
+                                    Create "{departmentInputValue}"
+                                  </Button>
+                                </div>
+                              ) : (
+                                "No departments found."
+                              )}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {uniqueDepartmentOptions.map((dept) => (
+                                <CommandItem
+                                  key={dept}
+                                  value={dept}
+                                  onSelect={() => {
+                                    field.onChange(dept);
+                                    setOpenDepartmentCombobox(false);
+                                    setDepartmentInputValue("");
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      field.value === dept ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {dept}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

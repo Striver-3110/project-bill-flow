@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Users,
@@ -43,13 +44,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Department data - would come from actual data in a full implementation
-const departmentData = [
-  { name: "Engineering", value: 40, color: "#10B981" },
-  { name: "Marketing", value: 20, color: "#6366F1" },
-  { name: "Sales", value: 15, color: "#F59E0B" },
-  { name: "HR", value: 10, color: "#EF4444" },
-  { name: "Finance", value: 15, color: "#8B5CF6" },
+// Colors for department chart
+const CHART_COLORS = [
+  "#10B981", "#6366F1", "#F59E0B", "#EF4444", "#8B5CF6", 
+  "#EC4899", "#0EA5E9", "#14B8A6", "#F97316", "#A855F7"
 ];
 
 const Employees = () => {
@@ -87,19 +85,52 @@ const Employees = () => {
       (!statusFilter || statusFilter === "all" || employee.status === statusFilter)
     );
 
+  // Generate department distribution data from actual employees
+  const departmentData = useMemo(() => {
+    if (!employees || employees.length === 0) return [];
+    
+    // Count employees by department
+    const departmentCounts: { [key: string]: number } = {};
+    employees.forEach(emp => {
+      if (emp.department) {
+        departmentCounts[emp.department] = (departmentCounts[emp.department] || 0) + 1;
+      }
+    });
+    
+    // Convert to chart format
+    return Object.entries(departmentCounts).map(([name, value], index) => ({
+      name,
+      value,
+      color: CHART_COLORS[index % CHART_COLORS.length]
+    }));
+  }, [employees]);
+
   // Compute stats for the dashboard
-  const employeeStats = {
+  const employeeStats = useMemo(() => ({
     totalEmployees: employees?.length || 0,
     activeEmployees: employees?.filter(e => e.status === 'active').length || 0,
     averageCostRate: employees?.length 
       ? employees.reduce((sum, e) => sum + e.cost_rate, 0) / employees.length 
       : 0,
-    totalDepartments: [...new Set(employees?.map(e => e.department))].length || 0,
+    totalDepartments: departmentData.length,
     // In a real app these would come from time entries or projects
     totalHours: 1640,
     activeAssignments: 38,
     totalProjects: 12,
-  };
+  }), [employees, departmentData.length]);
+
+  // Generate cost rate data from actual employees
+  const costRateData = useMemo(() => {
+    if (!employees || employees.length === 0) return [];
+    
+    return employees
+      .slice(0, 8) // Take top 8 for readability
+      .map(emp => ({
+        name: `${emp.first_name.charAt(0)}. ${emp.last_name}`,
+        rate: emp.cost_rate
+      }))
+      .sort((a, b) => b.rate - a.rate); // Sort by cost rate descending
+  }, [employees]);
 
   const handleExportEmployees = () => {
     // Create CSV content
@@ -286,27 +317,35 @@ const Employees = () => {
               <CardTitle>Department Distribution</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={departmentData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label
-                    >
-                      {departmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Legend />
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              {departmentData.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">No department data available</p>
+                </div>
+              ) : (
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={departmentData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label={({ name, percent }) => 
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {departmentData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Legend />
+                      <Tooltip formatter={(value) => [`${value} employees`, '']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -317,22 +356,23 @@ const Employees = () => {
               <CardTitle>Employee Cost Rates</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={employees?.slice(0, 8).map(emp => ({
-                      name: `${emp.first_name.charAt(0)}. ${emp.last_name}`,
-                      rate: emp.cost_rate
-                    }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, "Hourly Rate"]} />
-                    <Bar dataKey="rate" fill="#6366F1" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {costRateData.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-muted-foreground">No cost rate data available</p>
+                </div>
+              ) : (
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={costRateData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`$${value}`, "Hourly Rate"]} />
+                      <Bar dataKey="rate" fill="#6366F1" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
