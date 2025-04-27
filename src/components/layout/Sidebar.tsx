@@ -54,11 +54,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, toggleSidebar }) =>
         </div>
       )}
       
-      <div className="px-6 py-6 flex items-center border-b border-billflow-gray-200">
+      <div className="px-4 py-4 flex items-center border-b border-billflow-gray-200">
         <h1 className="text-2xl font-bold text-billflow-blue-600">InvoiceGenius</h1>
       </div>
       
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, toggleSidebar }) =>
               key={item.name}
               to={item.path}
               className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md group",
+                "flex items-center px-2 py-2 text-sm font-medium rounded-md group",
                 isActive(item.path)
                   ? "bg-billflow-blue-50 text-billflow-blue-600"
                   : "text-billflow-gray-700 hover:bg-billflow-gray-100"
@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, toggleSidebar }) =>
             >
               <Icon
                 className={cn(
-                  "mr-3 h-5 w-5",
+                  "mr-2 h-5 w-5",
                   isActive(item.path)
                     ? "text-billflow-blue-500"
                     : "text-billflow-gray-500"
