@@ -54,11 +54,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, toggleSidebar }) =>
         </div>
       )}
       
-      <div className="px-4 py-4 flex items-center border-b border-billflow-gray-200">
+      <div className="px-2 py-2 flex items-center border-b border-billflow-gray-200">
         <h1 className="text-2xl font-bold text-billflow-blue-600">InvoiceGenius</h1>
       </div>
       
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-1 py-2 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
