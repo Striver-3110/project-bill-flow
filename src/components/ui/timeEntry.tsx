@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { useProjects } from "@/hooks/use-projects";
 import { useEmployees } from "@/hooks/use-employees";
 import { Button } from "@/components/ui/button";
@@ -23,12 +21,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -44,11 +36,16 @@ import { useTimeEntryMutations } from "@/hooks/use-time-entry-mutations";
 interface FormData {
   project_id: string;
   employee_id: string;
-  date: Date | undefined;
+  month: string;
   hours: number;
   description: string;
   billable: boolean;
 }
+
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
 export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
   const [open, setOpen] = useState(false);
@@ -58,11 +55,16 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
   const { employees } = useEmployees();
   const { updateTimeEntry, addTimeEntry } = useTimeEntryMutations();
   
+  const getCurrentMonth = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  };
+
   const form = useForm<FormData>({
     defaultValues: {
       project_id: "",
       employee_id: "",
-      date: new Date(),
+      month: getCurrentMonth(),
       hours: 0,
       description: "",
       billable: true,
@@ -90,10 +92,13 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
   useEffect(() => {
     if (editEntry) {
       setOpen(true);
+      const entryDate = new Date(editEntry.date);
+      const monthValue = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}`;
+      
       form.reset({
         project_id: editEntry.project_id,
         employee_id: editEntry.employee_id,
-        date: new Date(editEntry.date),
+        month: monthValue,
         hours: editEntry.hours,
         description: editEntry.description || "",
         billable: editEntry.billable,
@@ -113,8 +118,8 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
         return;
       }
       
-      if (!data.date) {
-        toast.error("Please select a date");
+      if (!data.month) {
+        toast.error("Please select a month");
         return;
       }
       
@@ -125,10 +130,13 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
 
       setIsSubmitting(true);
 
+      const [year, month] = data.month.split('-');
+      const date = new Date(Number(year), Number(month) - 1, 1);
+
       const timeEntryData = {
         project_id: data.project_id,
         employee_id: data.employee_id,
-        date: data.date.toISOString().split('T')[0],
+        date: date.toISOString().split('T')[0],
         hours: data.hours,
         description: data.description,
         billable: data.billable,
@@ -230,43 +238,36 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
             
             <FormField
               control={form.control}
-              name="date"
+              name="month"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Month</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a month" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const date = new Date(2024, i, 1);
+                        const value = `2024-${String(i + 1).padStart(2, '0')}`;
+                        return (
+                          <SelectItem key={value} value={value}>
+                            {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(date)}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
+            
             <FormField
               control={form.control}
               name="hours"
