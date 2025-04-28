@@ -28,15 +28,12 @@ import { ApproveInvoiceDialog } from "@/components/invoices/ApproveInvoiceDialog
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState(() => {
-    const date = new Date();
-    date.setDate(1);
-    return date.toISOString().split('T')[0];
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   });
   const [endDate, setEndDate] = useState(() => {
-    const date = new Date();
-    date.setMonth(date.getMonth() + 1);
-    date.setDate(0);
-    return date.toISOString().split('T')[0];
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   });
 
   const queryClient = useQueryClient();
