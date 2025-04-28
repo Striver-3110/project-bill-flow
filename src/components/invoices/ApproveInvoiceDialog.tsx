@@ -40,9 +40,11 @@ export function ApproveInvoiceDialog({
 
       if (approvalError) throw approvalError;
 
+      // Update the invoice status to 'paid' which is a valid status in the database
+      // instead of using 'approved' which isn't an allowed value
       const { error: invoiceError } = await supabase
         .from('invoices')
-        .update({ status: 'approved' })
+        .update({ status: 'paid' })
         .eq('invoice_id', invoiceId);
 
       if (invoiceError) throw invoiceError;
@@ -66,7 +68,7 @@ export function ApproveInvoiceDialog({
           <DialogTitle>Approve Invoice {invoiceNumber}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p>Are you sure you want to approve this invoice? This will send the invoice to the client.</p>
+          <p>Are you sure you want to approve this invoice? This will mark the invoice as paid and update its status.</p>
           <div className="flex justify-end gap-4">
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
