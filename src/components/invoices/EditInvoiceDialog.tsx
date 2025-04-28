@@ -28,7 +28,7 @@ const invoiceSchema = z.object({
   invoice_number: z.string().min(1, "Invoice number is required"),
   invoice_date: z.string().min(1, "Invoice date is required"),
   due_date: z.string().min(1, "Due date is required"),
-  status: z.enum(["draft", "pending", "paid", "overdue", "sent"]),
+  status: z.enum(["draft", "pending", "paid", "overdue", "sent", "approved"]),
   total_amount: z.number().min(0, "Amount must be greater than 0"),
   currency: z.string().min(1, "Currency is required"),
   notes: z.string().optional(),
@@ -170,6 +170,7 @@ export function EditInvoiceDialog({ invoice, onInvoiceUpdated, trigger }: EditIn
                       <option value="sent">Sent</option>
                       <option value="paid">Paid</option>
                       <option value="overdue">Overdue</option>
+                      <option value="approved">Approved</option>
                     </select>
                   </FormControl>
                   <FormMessage />
