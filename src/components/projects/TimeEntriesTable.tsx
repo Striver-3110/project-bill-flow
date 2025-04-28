@@ -55,7 +55,7 @@ export const TimeEntriesTable = ({
             <TableHead>Date</TableHead>
             <TableHead>Project</TableHead>
             <TableHead>Employee</TableHead>
-            <TableHead>Hours</TableHead>
+            <TableHead>Days</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Billable</TableHead>
             <TableHead className="text-right">Actions</TableHead>

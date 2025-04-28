@@ -119,7 +119,7 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
       }
       
       if (data.hours <= 0) {
-        toast.error("Hours must be greater than 0");
+        toast.error("Days must be greater than 0");
         return;
       }
 
@@ -148,7 +148,6 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
       onClose();
     } catch (error: any) {
       console.error("Time entry error:", error);
-      // Error message is now handled by the mutation's onError callback
     } finally {
       setIsSubmitting(false);
     }
@@ -273,12 +272,12 @@ export function TimeEntryDialog({ editEntry = null, onClose = () => {} }) {
               name="hours"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Hours</FormLabel>
+                  <FormLabel>Days</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       step="0.5"
-                      placeholder="Enter hours worked" 
+                      placeholder="Enter days worked" 
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       value={field.value}
                     />
