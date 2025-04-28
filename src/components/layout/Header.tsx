@@ -1,8 +1,6 @@
-
 type HeaderProps = {
   toggleSidebar: () => void;
 };
-
 const Header = ({ toggleSidebar }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -29,9 +27,16 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             </svg>
             <span className="sr-only">Toggle Menu</span>
           </button>
-          <h1 className="font-bold text-xl text-primary hidden lg:block">
-            Employee Management
-          </h1>
+          <div className="font-bold text-xl text-primary hidden lg:block">
+            <div className="flex items-center">
+              <span className="mr-2">Powered by</span>
+              <img 
+                src="https://i.ibb.co/Z6nDP1Fx/top.png" 
+                alt="Logo" 
+                className="h-8" 
+              />
+            </div>
+          </div>
         </div>
       </div>
     </header>
