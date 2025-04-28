@@ -29,7 +29,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           </button>
           <div className="text-sm text-primary hidden lg:block">
             <div className="flex items-center">
-              <span className="mr-2">Powered by</span>
+              <span className="mr-2 mt-1">Powered by</span>
               <img 
                 src="https://i.ibb.co/Z6nDP1Fx/top.png" 
                 alt="Logo" 
