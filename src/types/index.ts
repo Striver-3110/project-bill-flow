@@ -1,19 +1,18 @@
-
 export interface Invoice {
   id: string;
   invoice_id?: string; // For backward compatibility
   client_id: string;
-  invoice_number: string; // Required for ReminderDialog
+  invoice_number: string;
   invoice_date: string;
   due_date: string;
-  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent' | 'approved'; // Updated to include 'approved'
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent' | 'approved';
   items: InvoiceItem[];
   total_amount: number;
-  currency: string; // Required for ReminderDialog
+  currency: string;
   client?: {
     client_name: string;
     [key: string]: any;
-  }; // Adding optional client property
+  };
   notes?: string;
   created_at?: string;
   updated_at?: string;
