@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -26,7 +27,7 @@ import { ApproveInvoiceDialog } from "@/components/invoices/ApproveInvoiceDialog
 
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedClient, setSelectedClient] = useState("all-clients");
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -48,7 +49,7 @@ const Invoices = () => {
       invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.client?.client_name.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesClient = !selectedClient || invoice.client_id === selectedClient;
+    const matchesClient = selectedClient === "all-clients" || invoice.client_id === selectedClient;
     
     const invoiceDate = new Date(invoice.invoice_date);
     const start = new Date(startDate);

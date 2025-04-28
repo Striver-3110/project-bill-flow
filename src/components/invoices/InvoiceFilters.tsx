@@ -53,7 +53,7 @@ export const InvoiceFilters = ({
             <SelectValue placeholder="Select client" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Clients</SelectItem>
+            <SelectItem value="all-clients">All Clients</SelectItem>
             {clients?.map((client) => (
               <SelectItem key={client.id} value={client.id || ""}>
                 {client.client_name}
