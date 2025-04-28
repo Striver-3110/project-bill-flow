@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -63,9 +62,10 @@ const Invoices = () => {
     paid: filteredInvoices.filter(inv => inv.status === 'paid').length,
     sent: filteredInvoices.filter(inv => inv.status === 'sent').length,
     overdue: filteredInvoices.filter(inv => inv.status === 'overdue').length,
+    approved: filteredInvoices.filter(inv => inv.status === 'approved').length,
   };
 
-  const getValidStatus = (status: string): "paid" | "sent" | "overdue" | "draft" | "active" | "inactive" | "completed" | "on-hold" => {
+  const getValidStatus = (status: string): "paid" | "sent" | "overdue" | "draft" | "active" | "inactive" | "completed" | "on-hold" | "approved" => {
     switch(status) {
       case 'paid':
         return 'paid';
@@ -75,6 +75,8 @@ const Invoices = () => {
         return 'overdue';
       case 'draft':
         return 'draft';
+      case 'approved':
+        return 'approved';
       default:
         return 'draft';
     }
@@ -276,20 +278,22 @@ const Invoices = () => {
                           }
                         />
 
-                        <ApproveInvoiceDialog
-                          invoiceId={invoice.invoice_id || invoice.id}
-                          invoiceNumber={invoice.invoice_number}
-                          onApproved={refetch}
-                          trigger={
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-green-600 mr-1"
-                            >
-                              Approve
-                            </Button>
-                          }
-                        />
+                        {invoice.status !== 'approved' && (
+                          <ApproveInvoiceDialog
+                            invoiceId={invoice.invoice_id || invoice.id}
+                            invoiceNumber={invoice.invoice_number}
+                            onApproved={refetch}
+                            trigger={
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-green-600 mr-1"
+                              >
+                                Approve
+                              </Button>
+                            }
+                          />
+                        )}
                         
                         <Button 
                           variant="ghost" 
