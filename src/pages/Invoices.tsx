@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
-  Search, 
   Eye,
   Edit,
   Trash,
@@ -10,11 +9,11 @@ import {
   Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status-badge";
 import { CreateInvoiceSheet } from "@/components/invoices/CreateInvoiceSheet";
 import { InvoiceStats } from "@/components/invoices/InvoiceStats";
+import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency, formatDate } from "@/utils/invoiceUtils";
 import { Invoice } from "@/types";
@@ -27,6 +26,7 @@ import { ApproveInvoiceDialog } from "@/components/invoices/ApproveInvoiceDialog
 
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedClient, setSelectedClient] = useState("");
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -48,11 +48,13 @@ const Invoices = () => {
       invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       invoice.client?.client_name.toLowerCase().includes(searchQuery.toLowerCase());
     
+    const matchesClient = !selectedClient || invoice.client_id === selectedClient;
+    
     const invoiceDate = new Date(invoice.invoice_date);
     const start = new Date(startDate);
     const end = new Date(endDate);
     
-    return matchesSearch && invoiceDate >= start && invoiceDate <= end;
+    return matchesSearch && matchesClient && invoiceDate >= start && invoiceDate <= end;
   }) ?? [];
 
   const stats = {
@@ -121,32 +123,16 @@ const Invoices = () => {
 
       <InvoiceStats {...stats} />
 
-      <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-billflow-gray-500" />
-            <Input
-              type="search"
-              placeholder="Search invoices..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-4">
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-        </div>
-      </Card>
+      <InvoiceFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+      />
 
       <div className="bg-white rounded-lg shadow-sm border border-billflow-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
