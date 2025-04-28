@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { 
   Search, 
   Eye,
@@ -23,15 +23,40 @@ import { ViewInvoiceDialog } from "@/components/invoices/ViewInvoiceDialog";
 import { MailInvoiceDialog } from "@/components/invoices/MailInvoiceDialog";
 import { DownloadInvoiceDialog } from "@/components/invoices/DownloadInvoiceDialog";
 import { PrintInvoiceDialog } from "@/components/invoices/PrintInvoiceDialog";
+import { ApproveInvoiceDialog } from "@/components/invoices/ApproveInvoiceDialog";
 
 const Invoices = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setDate(1);
+    return date.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + 1);
+    date.setDate(0);
+    return date.toISOString().split('T')[0];
+  });
+
+  const queryClient = useQueryClient();
   const { invoices, isLoading, error, deleteInvoice, refetch } = useInvoices();
 
-  const filteredInvoices = invoices?.filter(invoice => 
-    invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    invoice.client.client_name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) ?? [];
+  const handleClientUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ['invoices'] });
+  };
+
+  const filteredInvoices = invoices?.filter(invoice => {
+    const matchesSearch = 
+      invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      invoice.client?.client_name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const invoiceDate = new Date(invoice.invoice_date);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    return matchesSearch && invoiceDate >= start && invoiceDate <= end;
+  }) ?? [];
 
   const stats = {
     total: filteredInvoices.length,
@@ -109,6 +134,18 @@ const Invoices = () => {
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-4">
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
         </div>
@@ -251,6 +288,21 @@ const Invoices = () => {
                               className="text-billflow-gray-600 mr-1"
                             >
                               <Printer className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+
+                        <ApproveInvoiceDialog
+                          invoiceId={invoice.invoice_id || invoice.id}
+                          invoiceNumber={invoice.invoice_number}
+                          onApproved={refetch}
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-green-600 mr-1"
+                            >
+                              Approve
                             </Button>
                           }
                         />

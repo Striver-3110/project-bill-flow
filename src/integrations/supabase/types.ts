@@ -99,6 +99,80 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_approvals: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          invoice_id: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_approvals_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["invoice_id"]
+          },
+        ]
+      }
+      invoice_automation_settings: {
+        Row: {
+          admin_email: string
+          created_at: string
+          enabled: boolean
+          id: string
+          schedule_day: number
+          schedule_hour: number
+          schedule_minute: number
+          updated_at: string
+        }
+        Insert: {
+          admin_email: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          schedule_day?: number
+          schedule_hour?: number
+          schedule_minute?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_email?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          schedule_day?: number
+          schedule_hour?: number
+          schedule_minute?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoice_line_items: {
         Row: {
           amount: number
