@@ -27,7 +27,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             </svg>
             <span className="sr-only">Toggle Menu</span>
           </button>
-          <div className="text-lg text-primary hidden lg:block">
+          <div className="text-sm text-primary hidden lg:block">
             <div className="flex items-center">
               <span className="mr-2">Powered by</span>
               <img 
