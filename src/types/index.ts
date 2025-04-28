@@ -6,7 +6,7 @@ export interface Invoice {
   invoice_number: string; // Required for ReminderDialog
   invoice_date: string;
   due_date: string;
-  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent'; // Updated to include 'pending'
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'sent' | 'approved'; // Updated to include 'approved'
   items: InvoiceItem[];
   total_amount: number;
   currency: string; // Required for ReminderDialog

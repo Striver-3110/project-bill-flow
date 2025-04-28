@@ -13,6 +13,7 @@ import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { mailInvoice } from "@/utils/invoiceActions";
+import { Invoice } from "@/types";
 
 interface ApproveInvoiceDialogProps {
   invoiceId: string;
@@ -58,8 +59,28 @@ export function ApproveInvoiceDialog({
       // Send email notification if we have client data
       if (invoiceData?.client?.contact_email) {
         try {
+          // Create a properly formatted Invoice object
+          const formattedInvoice: Invoice = {
+            id: invoiceData.invoice_id,
+            invoice_id: invoiceData.invoice_id,
+            client_id: invoiceData.client_id,
+            invoice_number: invoiceData.invoice_number,
+            invoice_date: invoiceData.invoice_date,
+            due_date: invoiceData.due_date,
+            status: invoiceData.status as Invoice['status'],
+            items: [], // Empty array since we don't have items in this context
+            total_amount: invoiceData.total_amount,
+            currency: invoiceData.currency,
+            client: invoiceData.client,
+            billing_period_start: invoiceData.billing_period_start,
+            billing_period_end: invoiceData.billing_period_end,
+            created_at: invoiceData.created_at,
+            updated_at: invoiceData.updated_at,
+            payment_date: invoiceData.payment_date
+          };
+          
           await mailInvoice(
-            invoiceData,
+            formattedInvoice,
             invoiceData.client.contact_email,
             `Invoice ${invoiceNumber} Approved`,
             `Your invoice ${invoiceNumber} has been approved. Thank you for your business.`
